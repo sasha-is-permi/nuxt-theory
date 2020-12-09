@@ -78,6 +78,7 @@ build- создание итогового production- приложения
 
   generate- генерирует статические страницы в build если используем spa
 
+  2. Структура приложения. 
 
   Папки:
 
@@ -157,6 +158,51 @@ git remote add origin https://github.com/sasha-is-permi/nuxt-theory
 // В следующий раз можно посылать файлы более простой командой:
 // git push
 git push -u origin master
+
+
+loading- отвечает за загрузку страниц (для серверной загрузки)
+
+build - изменяем build-конфигурацию.
+
+Расширяем функционал webpack (клиентская сторона построенна на webpack)
+
+3. Создание разметки приложения. 
+
+Установим bootstrap 
+
+npm install bootstrap 
+
+В nuxt.config.js прописать если нет: 
+
+css: [
+ '@/node_modules/bootstrap/dist/css/bootstrap.min.css'
+]
+
+
+
+pages: index.vue 
+Убираем лишнее. 
+
+layout: 
+(сначала идет layout, затем страницы)
+
+Тоже очищаем.
+
+ <template>
+  <div class="container">
+    <Nuxt />
+  </div>
+</template>
+
+<style>
+
+</style>
+
+
+
+Создаем новый компонент navbar.vue. 
+
+
 
 
 -->
