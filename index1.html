@@ -41,7 +41,7 @@ SPA (для обычного динамического сайта)
 
 Author Enter
 
-Packrt meneger: npm
+Packet meneger: npm
 
 Запускаем проект: npm run dev
 На localhost:3000 
@@ -202,7 +202,86 @@ layout:
 
 Создаем новый компонент navbar.vue. 
 
+После скачивания на другой компьютер 
+(git clone:
+git init
+git name
+git email
+npm install
+npm run dev
+)
 
+2.4 Статические роуты.
+
+navbar.vue: 
+обеспечивает переход по страничкам
+
+<nav class="navbar navbar-expand-sm bg-light">
+
+
+  <ul class="navbar-nav">
+    <li class="nav-item">
+      <nuxt-link class="nav-link" to="/">Home</nuxt-link>
+    </li>
+    <li class="nav-item">
+       <nuxt-link class="nav-link" to="/users">Users</nuxt-link>
+    </li>
+    <li class="nav-item">
+      <nuxt-link class="nav-link" to="/about">About</nuxt-link>
+    </li>
+  </ul>
+
+</nav>
+1)
+Роуты создаем по другому чем во vue.
+Создаем файлы в определенной структуре. 
+
+Если нет ничего в адресной строке (home page):
+nuxt загружает index.vue
+Это главная страница. 
+
+В папке pages создаем users.vue. 
+Это обычный vue-компонент. 
+
+В этом файле:
+<template>
+  <section>
+     <h1> Users page </h1>
+  </section>
+</template> 
+
+Этого достаточно чтобы появилась страница
+localhost:3000/users
+
+2) Нужно создать страничку About в папке pages. 
+Создаем папку About, в ней index.vue
+
+Подключить sass-предпроцессор:
+npm install --save-dev sass sass-loader 
+(или при установке проекта)
+
+(для vue:
+npm i node-sass sass-loader)
+
+Можно использовать:
+<style lang="scss" scoped>
+h1 {
+  text-align:center;
+}
+
+</style>
+
+В navbar.vue: 
+
+<nuxt-link> 
+по анологии с <vue-link>
+- делает так чтобы страничка не перезагружалась при переходе по ссылке. 
+
+Вместо <a href=""> используем <nuxt-link to="">
+
+Теперь переходим в динамическом режиме как в SPA
+
+5. Динамические роуты и валидация. 
 
 
 -->

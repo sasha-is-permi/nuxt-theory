@@ -1,31 +1,21 @@
-<template>   
-<div>
-<Navbar/>
-<main>
-<div class="container">
-    <Nuxt />
+<template>
+  <div>
+    <Navbar />
+    <main>
+      <div class="container">
+        <nuxt />
+      </div>
+    </main>
   </div>
- </main> 
-
-</div>  
 </template>
 
- 
 <script>
-// Импортируем компонент  Navbar,  затем выводим на странице.
-//
-  import Navbar from '@/component/Navbar'
-  export default {
-      components: {
-         Navbar
-
-      }
-
+import Navbar from '@/components/Navbar'
+export default {
+  components: {
+    Navbar
   }
-
+}
 </script>
 
 
-<style>
-
-</style>

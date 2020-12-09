@@ -1,14 +1,8 @@
 <template>
   <section>
-    <h1>This is home page!</h1>
+    <h1>About page</h1>
   </section>
 </template>
-
-<script>
-
-export default {
-}
-</script>
 
 <style lang="scss" scoped>
 h1 {
