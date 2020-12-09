@@ -283,5 +283,109 @@ h1 {
 
 5. Динамические роуты и валидация. 
 
+Можем использовать 
+
+data () {
+return {}
+}
+
+Но можем использовать и стрелочную функцию:
+
+  data: () => ({
+    users: [
+      1, 2, 3, 4, 5
+    ]
+  })
+
+В users.vue: 
+
+<template>
+  <section>
+    <h1>Users page</h1>
+    <div class="menu">
+    <ul>
+
+      Выводим список из элементов массива 
+      <li v-for="user of users" :key="user">
+        При клике переходим без перезагрузки страницы на другую 
+        страничку- с User (goTO(user)- метод, описанный ниже)
+        <a href="#" @click.prevent="goTo(user)">User {{user}}</a>
+      </li>
+    </ul>
+    </div>
+  </section>
+</template>
+
+<script>
+export default {
+  data: () => ({
+    users: [
+      1, 2, 3, 4, 5
+    ]
+  }),
+  methods: {
+    // Программная (динамическая) навигация.
+    // программно определяем что нужно переходить на страничку
+    // users/1
+    goTo(user) {
+      this.$router.push('/users/' + user)
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+h1 {
+  text-align:center;
+}
+
+.menu{
+  display:flex;
+  justify-content:center;
+}
+
+</style>
+
+Чтобы создать еще страничку, на которую переходить-
+в папке Users должен быть файл _id.vue :
+
+<template>
+  <h1>User with id {{$route.params.id}}</h1>
+</template>
+
+<script>
+export default {
+  validate({params}) {
+    return /^\d+$/.test(params.id)
+  }
+}
+</script>
+
+
+Это будет шаблон странички, 
+на которую можно переходить. 
+
+Этот файл является роутом, который откликается на динамический параметр
+(user.id)
+
+nuxt будет передавать во vue router параметр id. 
+
+{{$route.params.id}} - это число, приходящее из users.vue, 
+массив user, текущий user (пункт меню, соотваетствующий текущему user)
+
+validate- метод, которым nuxt расширяет instanse vue: 
+регулярное выражение- должны быть только числа. 
+Применяем его (test) к params.id -значение переданной страницы
+params- объект типа {id:2}
+
+  validate({params}) {
+    return /^\d+$/.test(params.id)
+  }
+
+{params} - достаем поле с параметрами из контекста.
+
+Валидируем (проверяем) заход на данную страничку. 
+
+
 
 -->
