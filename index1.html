@@ -1,0 +1,162 @@
+<!-- 
+Nuxt.js
+Понадобится Visual studio code и плагин Vetur для проверки.
+
+https://nuxtjs.org
+
+Расширяет возможности vue.js .
+Из коробки предоставляет возможности сервер-сайт рендеринга.
+
+https://nuxtjs.org/guide/installation
+
+В visual studio code:
+
+1) Установить create-nuxt-app
+npm i -g create-nuxt-app
+
+Перейти в папку с проектами.
+/* на сайте рекомендуется:
+npm init nuxt-app <project-name>
+*/
+
+create-nuxt-app nuxt-theory
+
+Project name, description- просто enter
+
+Use a custom server framework: 
+Может использовать разные сервера- например, express.
+Если пишем none- nuxt.js   использует собственный сервер.
+
+Choose features to install 
+Дополнительные модули. Пока ничего не выбираем. 
+
+Use a custom UI fraimwork -
+выбираем bootstrap, vuetify или none. 
+Выберем none. 
+
+Тестовый фреймворк: выберем none.
+Choose rendering mode
+> Universal (выберем)Servise set rendering будет работать
+SPA (для обычного динамического сайта)
+
+Author Enter
+
+Packrt meneger: npm
+
+Запускаем проект: npm run dev
+На localhost:3000 
+доступен проект. 
+
+В package.json:
+
+В зависимости- nuxt
+Нет vue, vue-router, vuex - они входят в ядро nuxt
+
+
+dev - для разработки приложения
+
+build- создание итогового production- приложения
+
+
+  To get started:
+
+        cd nuxt-theory
+        npm run dev
+
+  To build & start for production:
+
+        cd nuxt-theory
+        npm run build
+        npm run start
+
+
+  start- запускает build-версию, чтобы она работала. 
+  
+  Для работы ssr (если его выбрали)
+  нужно чтобы был запущен и сервер и клиент. 
+  build start это и делает. 
+
+  generate- генерирует статические страницы в build если используем spa
+
+
+  Папки:
+
+  Структура папок важна.
+  
+  nuxt- служебная информация. 
+  
+  assets-   sass или js некомпилированные файлы там будут 
+  
+  components- обычные компоненты на vue.js 
+
+   Layout: 
+   компоненты первоочередные.
+
+  nuxt- куда рендерить страницу.
+  Похоже на router технологию vue 
+
+  middleware- рассмотрим в отдельном уроке. 
+
+pages:  
+Как главная страница
+index.vue
+
+Импортируем для неё из components/about.vue 
+import Logo '@/components/Logo.vue'
+или
+import Logo '~/components/Logo.vue'
+
+@ или ~ - импорт из корня папки. 
+
+node_modules - дополнительные модули
+
+plugins - плагины
+
+
+static- статические файлы типа favicon.ico и т.п
+картинки
+
+store- тут будем организовывать хранение данных vuex
+
+nuxt.config.js 
+
+Сначала загружаем файл package.json (require),
+ далее экспортируем js-объект, у которого есть набор конфигураций. 
+
+ mode: 'universal' - используем ssr. 
+ head: фактически index.html тут
+
+ 
+
+
+<template>
+  <div>
+    <Nuxt />
+  </div>
+</template>
+
+Респозиторий:
+https://github.com/sasha-is-permi/nuxt-theory
+
+
+// надо представиться если не представлялись. Один раз после создания проекта
+// Информация записывается в .git/config
+git init // создает git/config
+git config --local user.name "Alexandr"         - имя пользователя для проекта
+git config --local user.email sasha-is-permi@mail.ru         - e-mail
+
+
+// После создания или изменения файлов в проекте
+git add -A
+git commit -m "first commit"
+
+// Только первый раз при создании.
+// Информация записывается в .git/config
+git remote add origin https://github.com/sasha-is-permi/nuxt-theory
+// Посылаем файлы проекта на github
+// В следующий раз можно посылать файлы более простой командой:
+// git push
+git push -u origin master
+
+
+-->
