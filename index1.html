@@ -653,7 +653,7 @@ asyncData({params, error}) {
 
   Чтобы вызвало ошибку при заходе на страницу: 
 
-  
+
     asyncData({params, error}) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -666,6 +666,82 @@ asyncData({params, error}) {
       }, 1500)
     })
   }
+
+ 2.10
+ Async data на практике. 
+
+ сервис для работы с данными по REST API
+ https://jsonplaceholder.typicode.com
+
+ JSON файл получим:
+ https://jsonplaceholder.typicode.com/users
+
+
+ В pages/users/index.vue делаем асинхронный запрос: 
+ // делаем get-запрос с того адреса, где json-файл
+
+   asyncData({$axios, error}) {
+    return $axios.$get('https://jsonplaceholder.typicode.com/users')
+      .then(users => {
+        return {
+          users
+        }
+      })
+      .catch(err => {
+        error(err)
+      })
+  }
+
+  В asyncData не имеет доступа к this-
+  только работаем с контекстом.
+  Полученный объект users трансформируем в users,
+  который будем использовать внутри компонента
+  
+  Применение axios возвращает promise. 
+  При ошибке- вызываем error, получаемый из контекста.
+
+  Используем полученные с сервера данные:
+   <ul>
+  <li v-for="user of users" :key="user.id">
+    <a href="#" @click.prevent="goTo(user)">{{user.name}} ({{user.email}})</a>
+  </li>
+
+  В методах переходим по id пользователя: 
+
+  methods: {
+    goTo(user) {
+      this.$router.push('/users/' + user.id)
+    }
+  }
+
+
+Модифицируем шаблон для захода на страницу в конкретном меню:
+
+<template>
+  <div>
+    <h1>{{user.name}}</h1>
+    <hr />
+    <b>{{user.email}}</b>
+  </div>
+</template>
+
+<script>
+export default {
+  validate({params}) {
+    return /^\d+$/.test(params.id)
+  },
+  async asyncData({params, error, $axios}) {
+    try {
+      const user = await $axios.$get(`https://jsonplaceholder.typicode.com/users/${params.id}`)
+      return {user}
+    } catch (e) {
+      error(e)
+    }
+  }
+}
+</script>
+
+Получаем определенного user по его id. 
 
 
 
