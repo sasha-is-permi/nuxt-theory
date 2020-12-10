@@ -542,6 +542,131 @@ empty.vue для login.vue .
   <nuxt-link to="/">Home</nuxt-link>
 </p>
 
+2.8 Что такое модули. 
+
+Описание модулей nuxt:
+https://github.com/nuxt-community/awesome-nuxt
+
+Пример: описание как работать с модулем axios:
+https://axios.nuxtjs.org/
+
+Позволяет делать удобные ajax-запросы.
+
+npm install @nuxtjs/axios
+
+
+Вручную только редактируем
+nuxt.config.js 
+
+
+export default {
+  modules: [
+    '@nuxtjs/axios',
+  ],
+
+  axios: {
+    // proxy: true
+  }
+}
+
+А в package.json и в node_modules axios добавляется автоматически: 
+
+"dependencies": {
+    "@nuxtjs/axios": "^5.12.3",
+    "bootstrap": "^4.3.1",
+    "cross-env": "^5.2.0",
+    "nuxt": "^2.4.0"
+  }
+
+2.9 Asunc Data. 
+Как Nuxt работает с данными. 
+
+Vue
+Посылаем запрос на сервер, ждем, получаем данные. 
+
+Nuxt. 
+При использовании SSR сначала готовим данные на сервере, 
+а только потом возвращаем пользователю. 
+
+asyncData() - вызывается на серверной части 
+(до того как страничка отобразится). 
+
+Эмулируем асинхронный запрос через promice:
+asyncData должен возвращать promise:
+
+Перенесем массив users из data()
+в asyncData. 
+
+А в data() - локальные данные, 
+которые будем использовать на frontend.
+
+  asyncData() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve({
+          users: [
+            1, 2, 3, 4, 5
+          ]
+        })
+      }, 3000)
+    })
+  },
+  data() {
+    return {
+      pageTitle: 'Users page'
+    }
+  }
+
+В результате на клиент приёдет и массив users, 
+и pageTitle.
+
+При переходе на страничку users данные получаются 
+с задержкой 3 сек. 
+(поскольку там есть setTimeout )
+
+
+В nuxt.config.js: 
+
+делаем индикатор загрузки синий. 
+  loading: { color: 'blue' },
+
+Если не обновится- перезапускаем приложение.
+
+
+В users _id.vue добавляем: 
+Можем загрузить какого-то конкретного
+пользователя:
+<h1>{{user.name}}</h1>
+Если заходим пункт меню- выводится номер меню.
+
+asyncData({params, error}) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+         resolve({
+           user: {
+             name: `Test user ${params.id}`
+           }
+         })
+      }, 1500)
+    })
+  }
+
+  Чтобы вызвало ошибку при заходе на страницу: 
+
+  
+    asyncData({params, error}) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        reject(error(new Error('User not found')))
+        // resolve({
+        //   user: {
+        //     name: `Test user ${params.id}`
+        //   }
+        // })
+      }, 1500)
+    })
+  }
+
 
 
 -->

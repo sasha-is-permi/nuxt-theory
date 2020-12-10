@@ -1,46 +1,37 @@
 <template>
   <section>
-    <h1>Users page</h1>
-    <div class="menu">
-    <ul>
+    <h1>{{pageTitle}}</h1>
 
-      <!-- Выводим список из элементов массива -->
+    <ul>
       <li v-for="user of users" :key="user">
-        <!-- При клике переходим без перезагрузки страницы на другую 
-        страничку- с User (goTO(user)- метод, описанный ниже)-->
         <a href="#" @click.prevent="goTo(user)">User {{user}}</a>
       </li>
     </ul>
-    </div>
   </section>
 </template>
 
 <script>
 export default {
-  data: () => ({
-    users: [
-      1, 2, 3, 4, 5
-    ]
-  }),
+  asyncData() {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve({
+          users: [
+            1, 2, 3, 4, 5
+          ]
+        })
+      }, 500)
+    })
+  },
+  data() {
+    return {
+      pageTitle: 'Users page'
+    }
+  },
   methods: {
-    // Программная (динамическая) навигация.
-    // программно определяем что нужно переходить на страничку
-    // users/1
     goTo(user) {
       this.$router.push('/users/' + user)
     }
   }
 }
 </script>
-
-<style lang="scss" scoped>
-h1 {
-  text-align:center;
-}
-
-.menu{
-  display:flex;
-  justify-content:center;
-}
-
-</style>
