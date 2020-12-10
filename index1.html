@@ -387,5 +387,161 @@ params- объект типа {id:2}
 Валидируем (проверяем) заход на данную страничку. 
 
 
+2.6 
+
+
+Ссылки и обработка ошибок. 
+В navbar.vue: 
+Тому элементу li, который является активным- передаем class="active"
+
+Nuxt упрощает:
+Для nav-link: 
+добавляем active-class="active" 
+
+ exact для главной ссылки- home подсвечивается только тогда когда
+ активна. 
+
+navbar.vue: 
+
+<template>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">NuxtJS</a>
+
+      <div class="collapse navbar-collapse" >
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <nuxt-link exact active-class="active" class="nav-link" to="/">Home</nuxt-link>
+          </li>
+          <li class="nav-item">
+            <nuxt-link no-prefetch active-class="active" class="nav-link" to="/users">Users</nuxt-link>
+          </li>
+          <li class="nav-item">
+            <nuxt-link active-class="active" class="nav-link" to="/about">About</nuxt-link>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+</template>
+
+
+no-prefetch- подгружать страницу не сразу
+(во vue "ленивая загрузка")
+
+Для обработки ошибок захода на страницу:
+в папке layouts создаем файл error.vue (зарезервированное имя). 
+
+<template>
+  <section>
+    <h1>Error 404</h1>
+    <nuxt-link :to="'/'">Home</nuxt-link>
+  </section>
+</template>
+
+<style scoped>
+  h1 {
+    color: red;
+  }
+
+  section {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
+</style>
+
+2.7 Как работают Layouts. 
+
+В каталоге pages/users создаем файл  login.vue: 
+
+<template>
+  <form>
+    <h1>Login</h1>
+
+    <div class="form-group">
+      <input type="text" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <input type="password" class="form-control">
+    </div>
+
+    <p>
+      <nuxt-link to="/">Home</nuxt-link>
+    </p>
+
+    <button class="btn btn-primary">Login</button>
+  </form>
+</template>
+
+<script>
+export default {
+  layout: 'empty'
+}
+</script>
+
+
+<style scoped>
+  form {
+    width: 600px;
+  }
+</style>
+
+
+Создается форма, используя bootstrap: 
+в файле login.vue. 
+
+Затем в navbar.vue подключаем ссылку на страницу. 
+
+<li class="nav-item">
+     <nuxt-link no-prefetch active-class="active" class="nav-link" to="/login">Login</nuxt-link>
+</li>
+
+(тоже используем "ленивую загрузку") no-prefetch
+
+Хотим при загрузке страницы логин ее содержимое показывать по-центру, 
+другие пункты меню не показывать. 
+
+Создаем в layouts empty.vue с содержимым:
+
+<template>
+  <div class="container">
+    <nuxt />
+  </div>
+</template>
+
+<style scoped>
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 5rem;
+  }
+</style>
+
+
+Чтобы создать свой layout 
+для страницы login: 
+
+<script>
+export default {
+  layout: 'empty'
+}
+</script>
+
+
+(по умолчанию- default)
+
+Т.е. фактически используем шаблон 
+empty.vue для login.vue . 
+
+В login.vue возврат обратно на главную страницу: 
+
+<p>
+  <nuxt-link to="/">Home</nuxt-link>
+</p>
+
+
 
 -->

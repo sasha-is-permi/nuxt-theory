@@ -1,30 +1,24 @@
 <template>
   <header>
-   
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">NuxtJS</a>
 
-
-<nav class="navbar navbar-expand-sm bg-light">
-
-  <!-- Links -->
-  <div class="mx-auto">
-  <ul class="navbar-nav">
-    <li class="nav-item">
-      <nuxt-link class="nav-link" to="/">Home</nuxt-link>
-    </li>
-    <li class="nav-item">
-       <nuxt-link class="nav-link" to="/users">Users</nuxt-link>
-    </li>
-    <li class="nav-item">
-      <nuxt-link class="nav-link" to="/about">About</nuxt-link>
-    </li>
-  </ul>
-  </div>
-
-</nav>
-
-
-
-
-
+      <div class="collapse navbar-collapse" >
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <nuxt-link exact active-class="active" class="nav-link" to="/">Home</nuxt-link>
+          </li>
+          <li class="nav-item">
+            <nuxt-link no-prefetch active-class="active" class="nav-link" to="/users">Users</nuxt-link>
+          </li>
+          <li class="nav-item">
+            <nuxt-link active-class="active" class="nav-link" to="/about">About</nuxt-link>
+          </li>
+          <li class="nav-item">
+            <nuxt-link no-prefetch active-class="active" class="nav-link" to="/login">Login</nuxt-link>
+          </li>
+        </ul>
+      </div>
+    </nav>
   </header>
 </template>
