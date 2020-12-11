@@ -970,11 +970,17 @@ export default {
 // значит обращаемся к store/index.js 
 
 export const actions = {
-  // Вызываем с помощью метода commit mutation setToken()
+
+  
+  // Создаем 2 actions: 
+  login и logout
+
   login({commit}) {
+     // Вызываем с помощью метода commit mutation setToken(). Передаем ему значение "true" 
     commit('setToken', 'true')
   },
   logout({commit}) {
+    // Разлогиниваемся
     commit('clearToken')
   }
 }
@@ -995,7 +1001,165 @@ export const mutations = {
 }
 
 export const getters = {
+  // Приводим к boolean-значению state.token
   isAuth: state => !!state.token
 }
+
+
+navbar.vue: 
+
+<template>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">NuxtJS</a>
+
+      <div class="collapse navbar-collapse" >
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <nuxt-link exact active-class="active" class="nav-link" to="/">Home</nuxt-link>
+          </li>
+          <li class="nav-item">
+            <nuxt-link no-prefetch active-class="active" class="nav-link" to="/users">Users</nuxt-link>
+          </li>
+          <li class="nav-item">
+            <nuxt-link active-class="active" class="nav-link" to="/about">About</nuxt-link>
+          </li>
+          <li class="nav-item">
+            <nuxt-link no-prefetch active-class="active" class="nav-link" to="/login">Login</nuxt-link>
+          </li>
+          <li class="nav-item" v-if="isAuth">
+            <a class="nav-link" href="#" @click.prevent="logout">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+</template>
+
+<script>
+export default {
+  computed: {
+    isAuth() {
+      return this.$store.getters.isAuth
+    }
+  },
+  methods: {
+    logout() {
+      this.$store.dispatch('logout')
+    }
+  }
+}
+</script>
+
+
+Меняем navbar.vue: 
+
+
+<template>
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">NuxtJS</a>
+
+      <div class="collapse navbar-collapse" >
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <nuxt-link exact active-class="active" class="nav-link" to="/">Home</nuxt-link>
+          </li>
+          <li class="nav-item">
+            <nuxt-link no-prefetch active-class="active" class="nav-link" to="/users">Users</nuxt-link>
+          </li>
+          <li class="nav-item">
+            <nuxt-link active-class="active" class="nav-link" to="/about">About</nuxt-link>
+          </li>
+          <li class="nav-item">
+            <nuxt-link no-prefetch active-class="active" class="nav-link" to="/login">Login</nuxt-link>
+          </li>
+           Если пользователь авторизированн- показываем ссылку logout
+          <li class="nav-item" v-if="isAuth">
+            Вызываем Logout При клике на кнопку Logout            
+            <a class="nav-link" href="#" @click.prevent="logout">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+</template>
+
+<script>
+export default {
+  // Авторизированны или нет
+  // ссылку logout имеет смысл показывать только если пользователь авторизированн
+  computed: {
+    isAuth() {
+      return this.$store.getters.isAuth
+    }
+  },
+  methods: {
+    logout() {
+      this.$store.dispatch('logout')
+    }
+  }
+}
+</script>
+
+
+Защитим страничку (роут) Auth:
+Создаем middleware/auth.js:
+
+export default function({store, redirect}) {
+  // Если авторизация не прошла - возвращаемся к окошку ввода логина
+  // (пользователь переходит на страницу логина)
+  if (!store.getters.isAuth) {
+    redirect('/login')
+  }
+}
+
+Принимаем store 
+В store есть геттер, отвечающий за авторизацию. 
+Можно применить isAuth 
+
+
+На страничке about/index.vue 
+применяем соданный middleware 
+(их можно несколько использовать. Они будут вызываться по очереди- слева направо)
+
+<script>
+export default {
+  middleware: ['auth']
+}
+</script>
+
+
+2.14  NuxtServerInit. 
+
+Сделаем так, чтобы список пользователей 
+загружался сначала. 
+Сначала подгрузился- потом доступен.
+Раньше было- открыли страницу Users- загрузился список. 
+Только 1 раз загружается. 
+
+Сейчас будет- при открытии любой страницы в начале работы программы- 
+загружается список пользователей 1 раз, сохраняется в store. 
+Потом он отобразится на страничке Users.
+
+
+pages/users/index.vue - меняем
+Метод fetch закомментируем 
+
+Переходим в store/index.js 
+
+Применяем метод:
+Он вызывается на серверной части когда nuxt 
+начинает свою работу.
+
+// Вызываем action fetchUsers из модуля Users
+// Данный метод является асинхронным
+// поэтому используем async... await
+
+async nuxtServerInit({dispatch}) {
+  await dispatch('users/fetchUsers')
+}
+
+
 
 -->
