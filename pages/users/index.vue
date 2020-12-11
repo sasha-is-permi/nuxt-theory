@@ -12,20 +12,31 @@
 
 <script>
 export default {
-  asyncData({$axios, error}) {
-    return $axios.$get('https://jsonplaceholder.typicode.com/users')
-      .then(users => {
-        return {
-          users
-        }
-      })
-      .catch(err => {
-        error(err)
-      })
+  // async asyncData({store, error}) {
+  //   try {
+  //     await store.dispatch('users/fetchUsers')
+  //     return {}
+  //   } catch (e) {
+  //     error(e)
+  //   }
+  // },
+  async fetch({store, error}) {
+    try {
+      if (store.getters['users/users'].length === 0) {
+        await store.dispatch('users/fetchUsers')
+      }
+    } catch (e) {
+      error(e)
+    }
   },
   data() {
     return {
       pageTitle: 'Users page'
+    }
+  },
+  computed: {
+    users() {
+      return this.$store.getters['users/users']
     }
   },
   methods: {

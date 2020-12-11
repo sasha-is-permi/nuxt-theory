@@ -715,7 +715,8 @@ asyncData({params, error}) {
   }
 
 
-Модифицируем шаблон для захода на страницу в конкретном меню:
+Модифицируем шаблон для захода на страницу в конкретном меню
+(_id.vue):
 
 <template>
   <div>
@@ -743,6 +744,258 @@ export default {
 
 Получаем определенного user по его id. 
 
+2.11 Работа с vuex. 
 
+Заходим в папку store, создаем файл, отличный от index.js
+Nuxt будет счмитать это модулем vuex. 
+Создаем файл users.js. 
+Сдесь можно экспортировать state,mutations,actions,getters 
+
+
+Создаем action,  позволяющим грузить данные:
+
+export const actions = {
+  // асинхронный метод
+  async fetchUsers() {
+    try {
+      // Получаем объект "пользователи" с помощью асинхронного запроса axios
+      const users = await this.$axios.$get('https://jsonplaceholder.typicode.com/users')
+      return users
+    } catch (e) {
+      throw e // говорим об ошибке
+    }
+  }
+}
+
+блок try...catch -  чтобы не было необработанных ошибок. 
+
+Теперь в users/index.vue обращаемся не к axios а к store:
+
+export default {
+  async asyncData({store, error}) {
+    try {
+      // с помощью await дожидаемся объект users из store
+      const users = await store.dispatch('users/fetchUsers')
+      return {users}
+    } catch (e) {
+      error(e) // если есть ошибка- выводим её методом error()
+      (layout error)
+    }
+  },
+
+
+  Меняем код в store/user.js: 
+
+ export const actions = {
+  async fetchUsers({commit}) {
+    try {
+      const users = await this.$axios.$get('https://jsonplaceholder.typicode.com/users')
+      commit('setUsers', users)
+    } catch (e) {
+      throw e
+    }
+  },
+
+  // Для получения отдельного пользователя по id
+  async fetchUserById({}, userId) {
+    try {
+      return await this.$axios.$get(`https://jsonplaceholder.typicode.com/users/${userId}`)
+    } catch (e) {
+      throw e
+    }
+  }
+}
+
+export const getters = {
+  users: state => state.users
+}
+ 
+Используя store, теперь получаем страничку конкретного пользователя
+(раньше также получали, просто не вызывая store)
+
+В users/_id.vue: 
+
+  async asyncData({params, error, store}) {
+    try {
+      const user = await store.dispatch('users/fetchUserById', params.id)
+      return {user}
+    } catch (e) {
+      error(e)
+    }
+  }
+
+  Передаем id пользователя в store, вызываем 
+  action из srore fetchUserById, а в ответ получаем информацию о пользователе user
+
+  Будем загружать информацию о пользователях один раз, а не каждый раз. 
+  Загрузим все в state. 
+
+  Константа будет функцией, возвращающей объект. 
+  В store/user.js: 
+
+  export const state = () => ({
+  users: []
+})
+
+  Создаем mutation для изменения users
+export const mutations = {
+  setUsers(state, users) {
+    state.users = users
+  }
+}
+
+
+Создаем геттер:
+
+
+export const getters = {
+  users: state => state.users
+}
+
+// Принимаем commit чтобы получить доступ до mutation 
+// и изменить state:
+
+export const actions = {
+  async fetchUsers({commit}) {
+    try {
+      const users = await this.$axios.$get('https://jsonplaceholder.typicode.com/users')
+      commit('setUsers', users)
+    } catch (e) {
+      throw e
+    }
+  }
+
+
+В users/index.vue создаем computed-свойство для обращения к геттерам:
+
+  computed: {
+    users() {
+      return this.$store.getters['users/users']
+    }
+
+Вместо asyncData вызываем метод fetch():
+
+  async fetch({store, error}) {
+    try {
+      if (store.getters['users/users'].length === 0) {
+        await store.dispatch('users/fetchUsers')
+      }
+    } catch (e) {
+      error(e)
+    }
+  }
+
+  Разница- ничего не возвращаем из данного метода
+  (в asyncData пришлось бы возвращать пустой объект)
+  Просто вызываем по dispatch() нужный нам action. 
+
+  Чтобы загрузить массив пользователей только 1 раз: 
+
+   if (store.getters['users/users'].length === 0) {
+        await store.dispatch('users/fetchUsers')
+      }
+
+  Если еще не загрузили- подгружаем. 
+
+  2.13  Moddleware и защита роутов. 
+
+  Модифицируем страничку about/index.vue:
+
+  <template>
+  <section>
+    <h1>About page</h1>
+
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit, omnis.</p>
+
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quibusdam reprehenderit, corrupti recusandae quae ducimus consectetur.</p>
+  </section>
+</template>
+
+<script>
+export default {  
+  middleware: ['auth']
+}
+</script>
+
+
+Организуем систему, с помощью которой будем логиниться в приложение. 
+
+В login.vue:
+
+<template>
+  При вызове нажатии на кнопку отправки отменяем стандартное действие 
+  и вызываем метод onSubmit
+
+  <form @submit.prevent="onSubmit">
+    <h1>Login</h1>
+
+    <div class="form-group">
+      <input type="text" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <input type="password" class="form-control">
+    </div>
+
+    <p>
+      <nuxt-link to="/">Home</nuxt-link>
+    </p>
+
+    <button class="btn btn-primary" type="submit">Login</button>
+  </form>
+</template>
+
+<script>
+export default {
+  layout: 'empty',
+  methods: {
+    onSubmit() {
+      // вызываем метод "login" из store 
+      this.$store.dispatch('login')
+
+      this.$router.push('/')
+    }
+  }
+}
+</script>
+
+
+<style scoped>
+  form {
+    width: 600px;
+  }
+</style>
+
+// При вызове dispatch() не указали путь типа 'users/fetchUsers'
+// значит обращаемся к store/index.js 
+
+export const actions = {
+  // Вызываем с помощью метода commit mutation setToken()
+  login({commit}) {
+    commit('setToken', 'true')
+  },
+  logout({commit}) {
+    commit('clearToken')
+  }
+}
+
+export const state = () => ({
+  token: null
+})
+
+export const mutations = {
+  setToken(state, token) {
+    state.token = token
+  },
+
+  // logOut
+  clearToken(state) {
+    state.token = null
+  }
+}
+
+export const getters = {
+  isAuth: state => !!state.token
+}
 
 -->
