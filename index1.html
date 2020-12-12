@@ -1160,6 +1160,183 @@ async nuxtServerInit({dispatch}) {
   await dispatch('users/fetchUsers')
 }
 
+3. Front-end. Создание блога
 
+3.1 Создание проекта. 
+
+https://nuxtjs.org
+
+create-nuxt-up  
+
+https://github.com/nuxt/create-nuxt-app/blob/master/README.md
+
+Новый вариант
+npx create-nuxt-app <project-name>
+npm init nuxt-app <project-name>
+
+старый вариант  
+create-nuxt-app <project-name>
+
+На github:
+
+Make sure you have npx installed (npx is shipped by default since npm 5.2.0)
+
+npx create-nuxt-app <my-project>
+
+
+Or starting with npm v6.1 you can do:
+npm init nuxt-app@latest <my-project>
+
+
+Features
+Package manager
+Yarn
+Npm  *
+
+Programming language
+JavaScript *
+TypeScript
+
+UI framework:
+None (feel free to add one later) 
+Ant Design Vue
+BalmUI
+Bootstrap  или *
+Buefy
+Bulma
+Chakra UI
+Element    или * (element ui)
+Framevuerkb
+iView
+Tachyons
+Tailwind CSS
+Vuesax
+Vuetify
+
+Nuxt.js modules:
+Axios - Promise based HTTP client  *
+Progressive Web App (PWA)
+Content - Git-based headless CMS
+
+Linting tools:
+ESLint *
+Prettier
+Lint staged files
+StyleLint
+Commitlint
+
+Testing framework:
+None  *
+Jest
+AVA
+WebdriverIO
+Nightwatch
+
+Rendering mode
+Universal (SSR / Static)  *
+SPA
+
+Deployment target
+Server (Node.js hosting) *
+Static (Static/JAMStack hosting)
+
+Development tools
+jsconfig.json  *
+Semantic PR
+Dependabot (for GitHub only)
+
+Continous Integration
+GitHub Actions  *
+
+(Bootsrap- есть еще bootstrap vue- другая утилита bootstrap.
+Чтобы не перепутать- можно при установке не выбирать bootstrap, 
+установить потом:
+Установим bootstrap 
+
+npm install bootstrap 
+
+В nuxt.config.js прописать если нет: 
+
+css: [
+ '@/node_modules/bootstrap/dist/css/bootstrap.min.css'
+]
+
+
+
+)
+
+
+В проекте в данном случае:
+Use custom site freimwork- в прошлые разы выбирали none (встроенный 
+сервер nuxt, сейчас выбираем express)
+
+Nuxt JS + SSR. Подробное руководство (2020 год)
+https://www.youtube.com/watch?v=RheGRnLNSSc
+npx create-nuxt-app test-nuxt
+
+
+3.2 Настройка проекта. 
+
+Удаляем лишнее. 
+
+~ или @ указывает в пути на корень проекта 
+
+Плагин element-ui переименовываем в globals, указываем 
+русский язык.
+
+import Vue from 'vue'
+import Element from 'element-ui'
+import locale from 'element-ui/lib/locale/lang/ru-RU'
+
+Vue.use(Element, { locale })
+
+nuxt.config.js :
+
+  plugins: [
+    '@/plugins/globals'
+  ],
+
+
+   content: pkg.description
+
+  имеется в виду поле из package.json:  description
+
+3.3 Создание layout
+
+Создадим собственный layout на основе element ui
+https://element.eleme.io/#/en-US
+
+
+https://element.eleme.io/#/en-US/component/container
+
+<template>
+  <el-container>
+    <el-header>
+      <app-navigation />
+    </el-header>
+    <el-main>
+      <nuxt />
+    </el-main>
+    <el-footer />
+  </el-container>
+</template>
+
+<script>
+import AppNavigation from '@/components/main/Navigation'
+
+export default {
+  components: {
+    AppNavigation
+  }
+}
+</script>
+
+
+<style>
+
+</style>
+
+
+npm install --save-dev sass sass-loader
 
 -->
