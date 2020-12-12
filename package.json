@@ -1,24 +1,23 @@
 {
-  "name": "nuxt-theory",
+  "name": "nuxt-blog",
   "version": "1.0.0",
-  "description": "My super-excellent Nuxt.js project",
-  "author": "Vladilen",
+  "description": "My awesome nuxt fullstack blog",
+  "author": "Vladilen Minin",
   "private": true,
   "scripts": {
-    "dev": "nuxt",
+    "dev": "cross-env NODE_ENV=development nodemon server/index.js --watch server",
     "build": "nuxt build",
-    "start": "nuxt start",
+    "start": "cross-env NODE_ENV=production node server/index.js",
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "@nuxtjs/axios": "^5.12.3",
-    "bootstrap": "^4.3.1",
     "cross-env": "^5.2.0",
-    "nuxt": "^2.4.0"
+    "nuxt": "^2.4.0",
+    "express": "^4.16.4",
+    "element-ui": "^2.4.11",
+    "@nuxtjs/axios": "^5.3.6"
   },
   "devDependencies": {
-    "nodemon": "^1.18.9",
-    "sass": "^1.30.0",
-    "sass-loader": "^10.1.0"
+    "nodemon": "^1.18.9"
   }
 }
