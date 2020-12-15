@@ -1578,5 +1578,293 @@ export default {
 </style>
 
 3.6  Страница детального отображения.
+Функционал для кнопочки "Открыть" пишем + регистрируем 
+новый роут. 
+
+адресная строка:
+localhost:3000/post/34
+
+34- считываемый id поста
+
+в папке pages создаем папку post - это новый route 
+
+
+В адресной строке создается динамически страница с id- адрес поста
+Создаем в папочке _id.vue 
+
+<template>
+  <article class="post">
+    <header class="post-header">
+      <div class="post-title">
+        <h1>Post title</h1>
+        Тег с картинкой - стрелочка обратно. 
+        При нажатии на него- переход обратно на главную страничку. 
+        <nuxt-link to="/">
+          <i class="el-icon-back"></i>
+        </nuxt-link>
+      </div>
+      <div class="post-info">
+        <small>
+          <i class="el-icon-time"></i>
+          {{ new Date().toLocaleString() }}
+        </small>
+        <small>
+          картинка и число (число просмотров данного поста)
+          <i class="el-icon-view"></i>
+          42
+        </small>
+      </div>
+      <div class="post-image">
+        <img 
+          src="https://cdn.tripzaza.com/ru/destinations/files/2017/09/Berlin-e1505798693967.jpg" 
+          alt="post image"
+        >
+      </div>
+    </header>
+    <main class="post-content">
+      <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Autem veritatis accusantium voluptatibus accusamus quos doloremque ut in distinctio, quam delectus?</p>
+      <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Autem veritatis accusantium voluptatibus accusamus quos doloremque ut in distinctio, quam delectus?</p>
+      <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Autem veritatis accusantium voluptatibus accusamus quos doloremque ut in distinctio, quam delectus?</p>
+    </main>
+    <footer>
+
+    </footer>
+  </article>
+</template>
+
+<script>
+export default {
+  валидируют параметры: params- параметры, содержащиеся в адресной строке
+  validate({params}) {
+    если есть id в строке параметров- можем показывать страницу и она будет валидная
+    если нет params.id- вернется false. 
+    В таком случае не сможем вернуть страницу. 
+
+    return Boolean(params.id)
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+  .post {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .post-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .post-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .5rem;
+  }
+
+  .post-image img {
+    width: 100%;
+    height: auto;
+  }
+
+  .post-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .post-content {
+    margin-bottom: 2rem;
+  }
+</style>
+
+Чтобы настроить открытие страницы в components/.. post.vue: 
+При открытии вызывается метод Openpost
+Динамически создается страничка с указанным путем
+(переходим на новый создаваемый роут)
+В папочке post вызвается _id.vue и обрабатывается переданный ${id}:
+
+<script>
+export default {
+  methods: {
+    openPost() {
+      const id = 'test-id'
+      Создаем динамически страничку с указанным путем
+      id передаем в _id.vue - для обработки id в динамически создаваемой странице
+      (_id.vue- для динамически создаваемых страниц, 
+      папочка about с index.vue- для странички about, файл login.vue в корне pages-
+      для странички login) 
+      // в дальнейшем вместо id будем передавать this.post.id
+      this.$router.push(`/post/${id}`)
+    }
+  }
+}
+</script>
+
+
+3.7  Обработка ошибки роутов. 
+
+При попадении на страничку несуществующую- ошибка. 
+Создадим страничку для краствой обработки этой ошибки. 
+
+В папке layouts создаем error.vue. 
+Он будет отрабатывать когда есть какая-то ошибка. 
+
+<template>
+  <div class="error-layout">
+    <div class="error-content">
+      <h1 class="error-title">Ошибка 404</h1>
+      При ошибке- ссылка возврата на главную страничку 
+      <nuxt-link to="/">Вернуться на главную</nuxt-link>
+    </div>
+  </div>
+</template>
+
+<style lang="scss" scoped>
+  .error-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 4rem;
+  }
+
+  .error-title {
+    color: rgb(145, 6, 6);
+    margin-bottom: 1rem;
+  }
+</style>
+
+
+3.8 Список комментариев. 
+
+Для списка всех комментариев: 
+pages\post\_id.vue
+
+    <footer>
+    
+      Проверяем- есть или нет комментарии
+           
+      <div class="comments" v-if="true">
+        в цикле вызываем компонент app-comment
+        <app-comment
+         на каждой иттерации создаем переменную comment
+         передаем параметр comment в компонент app-comment
+         со значением 'comment'
+        v-for="comment in 4"
+          :key="comment"
+          // 
+          :comment="comment"
+        />
+      </div>
+
+   
+      <div class="text-center" v-else>Комментариев нет</div>
+    </footer>
+
+В script импортируем содержимое из comments.vue и создаем 
+новый тег <app-comment>:
+ 
+  <script>
+
+    Подключим и зарегистрируем компонент    
+
+import AppComment from '@/components/main/Comment'
+export default {
+  validate({params}) {
+    return Boolean(params.id)
+  },
+  components: {AppComment}
+}
+</script>
+
+
+
+Добавляем также components/main/comment.vue: 
+
+
+
+
+<template>
+  <el-card class="comment">
+    <div class="comment-header">
+      <span>Person name</span>
+      <span>
+        <i class="el-icon-time"></i>
+        {{ new Date().toLocaleString() }}
+      </span>
+    </div>
+    <div class="comment-text">
+      Lorem ipsum dolor sit amet.
+    </div>
+  </el-card>
+</template>
+
+<script>
+export default {
+  // входящий параметр comment забираем из другого
+  // компонента который его экспортирует. 
+
+  props: ['comment']
+}
+</script>
+
+<style lang="scss" scoped>
+  .comment {
+    margin-bottom: 1rem;
+  }
+
+  .comment-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  // Сохраняем
+  .comment-text {
+    white-space: pre-line;
+  }
+</style>
+
+Класс text-center- зададим в корневом scss-файле. 
+
+Props: 
+
+  	В app.vue:
+
+  <appCar
+  Передаем параметры carName и carYear со значениями, заданными ниже:
+  carName: 'Ford',    carYear: 2018  в компонент appCar (зарегистрирован как appCar компонент car.vue в app.vue)
+
+	:carName="carName"
+	:carYear="carYear"
+	>
+
+   Не экспортируем, а задаем значения
+   export default {
+   data () { 	return {    carName: 'Ford',    carYear: 2018 }   }
+                  }
+	
+
+
+	
+    В car.vue:
+    Принимаем значения из другого компонента с помощью props
+    (значение передается из app.vue с помощью использования тега
+      <appCar>, которым назван car.vue)
+
+    export default {
+	props:['carName','carYear']
+	               }
+
+3.9 Форма добавления комментариев
 
 -->
