@@ -1397,4 +1397,186 @@ html, body {
    В этом файле можно задавать стили для всего приложения. 
 
 
+   3.4  Главная страница. 
+
+   В pages:  index.vue выводим список всех постов 
+
+  В данном фреймворке elements ui: 
+
+  xs <768 px
+  sm >=768 px
+  md >=992 px
+  lg >=1200px
+  xl >]1920 px
+
+
+
+
+
+
+<template>
+  На сайте фреймворка Elements UI
+  Components/Layout: 
+   можно задать атрибуты типа type: 
+
+  <el-row type="flex" justify="center">
+  
+    По умолчанию при экране xs тег будет занимать 24 колонки
+    байдинг ":" - чтобы показать что мы передаем 24 как число 
+    иначе-строка
+
+    <el-col :xs="24" :sm="18" :md="12" :lg="10">
+      в цикле выводим посты с помощью компонента app-post (Apppost)
+      <app-post
+        v-for="post in 3"
+        :key="post"
+      />
+    </el-col>
+  </el-row>
+</template>
+
+<script>
+import AppPost from '@/components/main/Post'
+export default {
+  // это получается заголовок вверху страницы
+  head: {
+    title: 'Главная'
+  },
+  components: {
+    AppPost
+  }
+}
+</script>
+
+<style>
+
+</style>
+
+Импортируем файл components/main/post.vue  как Apppost
+и используем его (выше)
+
+
+post.vue: 
+(шаблон поста) 
+Для компонентов реккомендуется добавлять собственный префикс, 
+например Apppost
+
+<template>
+  <article class="post">
+
+  </article>
+</template>
+
+<script>
+export default {
+  
+}
+</script>
+
+<style lang="scss" scoped>
+  .post {
+    height: 200px;
+    border: 1px solid black;
+    margin-bottom: 2rem;
+  }
+</style>
+
+
+3.5  Компонент пост. 
+Дорабатываем компонент "Пост": 
+Компонент Card из elements ui: 
+
+
+
+<template>
+  <el-card
+
+Атрибуты карточки card: 
+затенение- при наведении (на сайте фреймворка это свойство описанно)
+     shadow="hover"
+стиль : отступов нет (можно и так передавать что отступов нет)     
+    :body-style="{padding: 0}"
+    class="post"
+  >
+    <header slot="header" class="post-header">
+     
+      Название поста
+      <h3>Post title</h3>
+
+
+      <small>
+        в elements ui а поиске icon: 
+        таким образом иконку выводим
+        <i class="el-icon-time"></i>
+        Приведение даты к строковому виду
+        {{ new Date().toLocaleString() }}
+      </small>
+    </header>
+    <div class="post-body">
+      <img 
+        src="https://cdn.tripzaza.com/ru/destinations/files/2017/09/Berlin-e1505798693967.jpg" 
+        alt="post image" 
+        class="post-img"
+      >
+    </div>
+    <footer class="post-footer">
+      В components UI button: 
+      el-button
+
+      round  - передаем round="true"
+      При клике на кнопку- вызываем метод openPost 
+      <el-button round @click="openPost">Открыть</el-button>
+
+      <span>
+        изображение конвертика
+        <i class="el-icon-message"></i>
+
+        12
+      </span>
+    </footer>
+  </el-card>
+</template>
+
+<script>
+export default {
+  methods: {
+    openPost() {
+      console.log('Open post')
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+  отступ от поста
+  .post {
+    margin-bottom: 1.5rem;
+  }
+
+  разносим по разные стороны
+  .post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; по вертикали по центру
+  }
+
+  .post-img {
+    зпнимает всю ширину, по высоте центрируем
+    width: 100%;
+    height: auto;
+  }
+
+  В footer разносим по разные 
+  стороны элементы, центрируем по вертикали
+  и делаем отступы 
+  .post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+  }
+</style>
+
+3.6  Страница детального отображения.
+
 -->
