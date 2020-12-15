@@ -1,5 +1,5 @@
 <template>
-  <div></div>
+  <div> Страница1 </div>
 </template>
 
 <script>

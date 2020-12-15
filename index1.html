@@ -1301,6 +1301,8 @@ nuxt.config.js :
 
   имеется в виду поле из package.json:  description
 
+Сейчас имеется "чистый" проект на nuxt
+
 3.3 Создание layout
 
 Создадим собственный layout на основе element ui
@@ -1312,8 +1314,14 @@ https://element.eleme.io/#/en-US/component/container
 <template>
   <el-container>
     <el-header>
+      Тут используем подключенный через javascript компонент navigation.vue . 
+      Получается- сверху - этот компонент, ниже выводятся pages 
       <app-navigation />
     </el-header>
+    Это элементы из фреймврока Elements UI
+    Тут будем выводить странички и pages
+    (  <nuxt /> - обеспечивает вывод (рендеринг)
+    страничек)
     <el-main>
       <nuxt />
     </el-main>
@@ -1338,5 +1346,55 @@ export default {
 
 
 npm install --save-dev sass sass-loader
+( Или в текущем курсе совет по установке:
+npm i -D node-sass sass-loader   )
+
+
+Подключаем navigation.vue: 
+
+<template>
+  <nav>
+    <h1>SSR Blog</h1>
+  </nav>
+</template>
+
+<style lang="scss" scoped>
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    border-bottom: 1px solid #e6e6e6;
+  }
+</style>
+
+Создадим тему в паплчке theme
+index.scss:
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Helvetica Neue',Helvetica,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',SimSun,sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+Затем в nuxt.config.js подключаем данный файл: 
+
+  css: [
+    'element-ui/lib/theme-chalk/index.css',
+	'@/theme/index.scss'
+    ]
+    
+   В этом файле можно задавать стили для всего приложения. 
+
 
 -->
