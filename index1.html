@@ -1867,4 +1867,348 @@ Props:
 
 3.9 Форма добавления комментариев
 
+Компонент для добавления комментариев для поста: 
+Components/main/CommentForm.vue 
+
+
+<template>
+  <el-form
+    значения, которые вводятся в поля формы 
+    :model="controls"
+    добавляем правила валидации- массив определен ниже. 
+    это на сайте elements ui в главе про формы
+    :rules="rules"
+    ref="form"
+    // нативный метод submit- прослушка для всей формы
+    // (можно и на конкретную кнопку повесить событие, или на всю форму)
+    // prevent-  отменяем стандартное действие
+    // Вызываем метод onSubmit
+
+
+    @submit.native.prevent="onSubmit"
+  >
+    <h1>Добавить комментарий</h1>
+    name- связанно с полем conrols.name  двухсторонним связыванием  
+    <el-form-item label="Ваше имя" prop="name">
+      двухстороннее связывание input и переменной. trim удаляет пробелы
+      <el-input v-model.trim="controls.name" />
+    </el-form-item>
+
+    <el-form-item label="Текст комментария" prop="text">
+      <el-input
+        type="textarea"
+        v-model.trim="controls.text"
+        resize="none"
+        :rows="2"  // показываем 2 строчки текстового поля
+      />
+    </el-form-item>
+
+    <el-form-item>
+      <el-button
+        type="primary"
+        тип кнопки. Это на сайте elements ui/form  
+        эти аттрибуты описанны
+        native-type="submit"
+        round
+      >
+        Добавить комментарий
+      </el-button>
+    </el-form-item>
+  </el-form>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      controls: {
+        name: '',
+        text: ''
+      },
+      правила валидации 
+      триггер blur- при потере фокуса (оставлении поля) валидация
+      можно добавить еще элемент массива: 
+      { min: 3, max: 5, message: 'Длина должна быть от 3 до 5', trigger: 'blur' }
+
+      rules: {
+        name: [
+          { required: true, message: 'Имя не должно быть пустым', trigger: 'blur' }
+        ],
+        text: [
+          { required: true, message: 'Введите ваш комментарий', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  methods: {
+    // отправляем только валидные комментарии
+    // этот текст скопировали с сайта фреймворка elements ui
+    onSubmit() {
+      (форму назвали в заголовке формы- ref="form")
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          // Если форма валидна
+          console.log('Form is Valid')
+        }
+      })
+    }
+  }
+}
+</script>
+
+
+<style lang="scss" scoped>
+
+</style>
+
+В динамической странице формирования поста: pages\_id.vue: 
+
+импортируем компонент по созданию формы:
+import AppCommentForm from '@/components/main/CommentForm'
+
+Регистрируем: 
+export default {
+  validate({params}) {
+    return Boolean(params.id)
+  },
+  components: {AppComment, AppCommentForm}
+}
+
+Используем: 
+ <footer>
+      <app-comment-form />
+ ...
+ </footer>
+
+ На сайте Elements UI: 
+ компонент Form. 
+
+3.10 Валидация и логика для добавления комментария
+
+Редактируем файл commentForm.vue: 
+
+<template>
+  <el-form
+    :model="controls"
+    :rules="rules"
+    ref="form"
+    @submit.native.prevent="onSubmit"
+  >
+    <h1>Добавить комментарий</h1>
+
+    <el-form-item label="Ваше имя" prop="name">
+      <el-input v-model.trim="controls.name" />
+    </el-form-item>
+
+    <el-form-item label="Текст комментария" prop="text">
+      <el-input
+        type="textarea"
+        v-model.trim="controls.text"
+        resize="none"
+        :rows="2"
+      />
+    </el-form-item>
+
+    <el-form-item>
+      <el-button
+        type="primary"
+        native-type="submit"
+        round
+        // связываем аттрибут с переменной
+        :loading="loading"
+      >
+        Добавить комментарий
+      </el-button>
+    </el-form-item>
+  </el-form>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      загрузка данных не идет пока- кнопка "Добавит комментарий" активна
+      loading: false,
+      controls: {
+        name: '',
+        text: ''
+      },
+      rules: {
+        name: [
+          { required: true, message: 'Имя не должно быть пустым', trigger: 'blur' }
+        ],
+        text: [
+          { required: true, message: 'Введите ваш комментарий', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  methods: {
+    onSubmit() {
+      this.$refs.form.validate(valid => {
+        if (valid) {
+          // свойство из element ui
+          // если true- кнопка блокируется, идет как бы загрузка 
+          // данных формы на сервер
+          this.loading = true
+          
+          // данные для отправки на сервер- собираем из полей формы
+          const formData = {
+            name: this.controls.name,
+            text: this.controls.text,
+            postId: ''
+          }
+
+          try {
+            setTimeout(() => {
+              // Сначала сообщение, а потом $emit
+              // ($emit будет при событии created вызывать метод из _id.vue:
+              //     @created="createCommentHandler"
+
+              // на сайте elemenst ui- у инстанса vue благодаря этому фреймворку
+              // появляется новый метод, благодаря которому можкм выводить красивые сообщения 
+              this.$message.success('Комментарий добавлен')
+              // $emit связывает родительский компонент и дочерний. 
+              // при событии created (создание- что-то делаем)
+              this.$emit('created')
+            }, 2000)
+          } catch (e) {
+            //
+            this.loading = false
+          }
+        }
+      })
+    }
+  }
+}
+</script>
+
+
+<style lang="scss" scoped>
+
+</style>
+
+
+
+Редактируем метод, в котором добавляем форму
+(pages/form/id.vue)
+<template>
+  <article class="post">
+    <header class="post-header">
+      <div class="post-title">
+        <h1>Post title</h1>
+        <nuxt-link to="/">
+          <i class="el-icon-back"></i>
+        </nuxt-link>
+      </div>
+      <div class="post-info">
+        <small>
+          <i class="el-icon-time"></i>
+          {{ new Date().toLocaleString() }}
+        </small>
+        <small>
+          <i class="el-icon-view"></i>
+          42
+        </small>
+      </div>
+      <div class="post-image">
+        <img
+          src="https://cdn.tripzaza.com/ru/destinations/files/2017/09/Berlin-e1505798693967.jpg"
+          alt="post image"
+        >
+      </div>
+    </header>
+    <main class="post-content">
+      <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Autem veritatis accusantium voluptatibus accusamus quos doloremque ut in distinctio, quam delectus?</p>
+      <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Autem veritatis accusantium voluptatibus accusamus quos doloremque ut in distinctio, quam delectus?</p>
+      <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Autem veritatis accusantium voluptatibus accusamus quos doloremque ut in distinctio, quam delectus?</p>
+    </main>
+    <footer>
+      <app-comment-form
+      // если комментарий еще не добавлен- добавляем его
+        v-if="canAddComment"
+        В этом методе добавим комментарий к существующему списку,
+        а также скроем форму.
+        Прослушиваем событие "created"
+         (компонент создан, но еще не заложен в dom-дерево)
+
+        @created="createCommentHandler"
+      />
+
+      <div class="comments" v-if="true">
+        <app-comment
+          v-for="comment in 4"
+          :key="comment"
+          :comment="comment"
+        />
+      </div>
+      <div class="text-center" v-else>Комментариев нет</div>
+    </footer>
+  </article>
+</template>
+
+<script>
+import AppComment from '@/components/main/Comment'
+import AppCommentForm from '@/components/main/CommentForm'
+
+export default {
+  validate({params}) {
+    return Boolean(params.id)
+  },
+  data() {
+    return {
+      // Пользователь, который зайдет на страничку впервые, 
+      // сможет добавлять комментарии
+      canAddComment: true
+    }
+  },
+  methods: {
+    createCommentHandler() {
+      // комментарий уже добавлен
+      this.canAddComment = false
+    }
+  },
+  components: {AppComment, AppCommentForm}
+}
+</script>
+
+<style lang="scss" scoped>
+  .post {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .post-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .post-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .5rem;
+  }
+
+  .post-image img {
+    width: 100%;
+    height: auto;
+  }
+
+  .post-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .post-content {
+    margin-bottom: 2rem;
+  }
+</style>
+
+Можно в коде написать ключевое слово "debugger"- попадем 
+в дебаггер, там можно посмотреть значения переменных. 
+
+
+
 -->
