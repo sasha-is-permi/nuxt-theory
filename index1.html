@@ -2302,4 +2302,100 @@ export default {
 </script>
 
 
+4.2  Меню навигации. 
+Компонент, позволяющий делать навигацию внутри админки. 
+Импортируем компонент из components\admin\aside.vue 
+в файле components\layout\admin.vue
+
+Это меню слева
+
+components\layout\admin.vue:
+<template>
+  <div class="admin-layout-wrap">
+    <el-container :style="{height: '100%'}">
+      <el-aside width="250px">
+        <app-aside />
+      </el-aside>
+      <el-main>
+        <nuxt />
+      </el-main>
+    </el-container>
+  </div>
+</template>
+
+<script>
+import AppAside from '@/components/admin/Aside'
+
+export default {
+  components: {AppAside}
+}
+</script>
+
+<style lang="scss" scoped>
+  .admin-layout-wrap {
+    width: 100%;
+    height: 100vh;
+  }
+</style>
+
+
+(для страницы localhost://admin (она в pages/admin
+указан этот layout))
+
+Создаем меню слева
+(components\admin\aside.vue)
+
+Nav menu описанно: 
+https://element.eleme.io/#/en-US/component/menu
+
+
+<template>
+  <el-menu
+    router  // Параметр router в меню element ui- каждый пункт меню будет являться ссылкой.
+    :style="{height: '100%'}" //вертикальное меню на всю страничку- чтобы 
+    :default-active="$route.path" // активный пункт меню в element ui (чтобы его подсвечивать)
+    текущий пункт меню определяется тем, на какой странице мы находимся ($route.path -
+    системная переменная vue, и исходя из этого выделяется цветом).
+    С помощью пунктов меню можно перейти на подстраничку, системная переменная изменится и подсветка
+    активного пункта меню изменится. 
+  >
+    <el-menu-item index="/admin">  //  /admin/index.vue
+      <i class="el-icon-menu"></i>
+      <span>Аналитика</span>
+    </el-menu-item>
+    <el-menu-item index="/admin/create">  // admin/create.vue
+      <i class="el-icon-edit-outline"></i>  // с сайта element ui/icon - выбираем картинки для элементов меню
+      <span>Создать</span>
+    </el-menu-item>
+    <el-menu-item index="/admin/list">
+      <i class="el-icon-tickets"></i>
+      <span>Посты</span>
+    </el-menu-item>
+    <el-menu-item index="/admin/user">
+      <i class="el-icon-service"></i>
+      <span>Пользователи</span>
+    </el-menu-item>
+    <el-menu-item index="/admin/logout">
+      <i class="el-icon-setting"></i>
+      <span>Выйти</span>
+    </el-menu-item>
+  </el-menu>
+</template>
+
+Так роутинг организованн в nuxt. 
+Когда ссылаемся на localhost:3000/admin/list 
+переходим в pages/admin/list.vue автоматически. 
+(или admin/list/index.vue нужно делать)
+
+
+Для каждой созданной страницы добавляеуи админский layout, 
+чтобы меню не терялось
+
+<script>
+export default {
+  layout: 'admin'
+}
+</script>
+
+
 -->
