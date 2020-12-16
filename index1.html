@@ -2248,4 +2248,58 @@ html, body {
   opacity: 0; // сначала страница полностью прозрачная
 }
 
+4. Front-end. Панель администратора. 
+
+4.1 Создание структуры страниц
+
+Для создания layout: 
+https://element.eleme.io/#/en-US/component/container
+
+В папочке layout новый файл: admin.vue:
+
+
+<template>
+  <div class="admin-layout-wrap">
+    высота блока- 100%
+    <el-container :style="{height: '100%'}">
+      <el-aside width="200px">
+        Aside
+      </el-aside>
+      <el-main>
+        Сюда будем рендерить страницу
+        <nuxt />
+      </el-main>
+    </el-container>
+  </div>
+</template>
+
+<script>
+export default {
+
+}
+</script>
+
+<style lang="scss" scoped>
+  на всю ширину и высоту основной блок
+  .admin-layout-wrap {
+    width: 100%;
+    height: 100vh;
+  }
+</style>
+
+В папке pages создаем папку admin. 
+Будет роут admin (страничка) - административная панель.
+В нем файл index.vue. 
+
+<template>
+  <h1>Welcome to admin page</h1>
+</template>
+
+<script>
+export default {
+  layout: 'admin' // используем шаблон (layout) admin
+}
+</script>
+
+
 -->
