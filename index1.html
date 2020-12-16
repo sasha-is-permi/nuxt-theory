@@ -2209,6 +2209,43 @@ export default {
 Можно в коде написать ключевое слово "debugger"- попадем 
 в дебаггер, там можно посмотреть значения переменных. 
 
+3.11 
+Анимация при изменении страниц
 
+Плавный переход при смене страниц. 
+Это касается vue, nuxt. 
+
+Добавим базовую анимацию. Для этого воспользуемся 
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Helvetica Neue',Helvetica,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',SimSun,sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+.text-center {
+  text-align: center;
+}
+// Когда заходим на страницу и когда 
+// покидаем страницу
+.page-enter-active, .page-leave-active {
+  // прозрачность анимируем 0.4 сек.
+  transition: opacity .4s;  // тут страница непрозрачная
+  // имеется в виду конечное значение opacity:1. 
+  // Это по умолчанию, можно не писать.
+}
+
+.page-enter, .page-leave-active {
+  opacity: 0; // сначала страница полностью прозрачная
+}
 
 -->
