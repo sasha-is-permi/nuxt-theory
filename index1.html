@@ -2488,5 +2488,236 @@ export default {
 http://localhost:3000/admin/login
 
 
+4.4  Создание авторизации с vuex. 
+
+login.vue: при отправке формы вызывается метод onSubmit()
+      Обращаемся к форме:       
+      this.$refs.form.validate(async valid => {
+        если форма валидна:
+        if (valid) {
+          // переменная: загрузка- идет
+          this.loading = true
+          эмуляция отправки post-запроса на сервер      
+          try {
+            создаем новый объект, записываем туда значения, считанные из полей формы
+            const formData = {
+              login: this.controls.login,
+              password: this.controls.password
+            }
+            // используем асинхронную функцию- ждем авторизацию... 
+            // Чтобы использовать await нужно выше написать:
+            // async valid  
+            await this.$store.dispatch('auth/login', formData)
+            // если все успешно (try блок)- переходим на страничку admin
+            this.$router.push('/admin')
+
+          } catch (e) {
+            // для ошибок- сделаем общую шину.          
+            this.loading = false // если ошибка- прекращаем загрузку
+          }
+        }
+      })
+
+
+    Nuxt vuex: 
+    https://ru.nuxtjs.org/docs/2.x/directory-structure/store/
+
+    vuex по умолчанию идет с nuxt,  отдельно подключать его не надо. 
+
+    Ещё ссылка на описание:
+    https://nuxtjs.org/guide/vuex-store
+
+    store/ auth.js
+    Файл отвечает за авторизацию: 
+
+  state записываем как функцию- форма записи в nuxt. 
+  token-  переменная, которая будет приходить с сервера. 
+  Если есть token- проверяем на валидность- отправляем на backend. 
+  Нет токена- значит не авторизованны. 
+
+
+    export const state = () => ({
+  token: null
+})
+
+export const mutations = {
+  setToken(state, token) {
+    // Принимаем token с сервера, 
+    // изменяем тот token, который в state.
+    state.token = token
+  }
+}
+
+export const actions = {
+  асинхронная функция. Принимает 2 метода.
+  Эмулируем работу с сервером. Вызываем 
+  метод resolve() через 2 сек.
+  async login({commit, dispatch}, formData) {
+    const token = await new Promise(resolve => {
+      возаращаем в token значение 'mock-token', которое приходит с сервера
+      setTimeout(() => resolve('mock-token'), 2000)
+    })
+    // вызываем action setToken
+    // dispatch вызывает action
+    dispatch('setToken', token)
+  },
+  // вызываем mutation setToken
+  // commit обращается к mutation
+  setToken({commit}, token) {
+    commit('setToken', token)
+  }
+}
+
+export const getters = {
+  // getter isAuthenticated: 
+  // принимает state, затем с помощью стрелочной функции 
+  // преобразуем к булевскому значению и возвращаем его
+  // state.token- пришло какое-то значение с сервера-true (авторизованно),
+  // пустой- false (не авторизовано)
+   
+
+  isAuthenticated: state => Boolean(state.token)
+}
+
+
+Экспортируем из модуля - такая форма записи в nuxt для vuex. 
+
+В login.vue: 
+   await this.$store.dispatch('auth/login', formData)
+   Вызываем из модуля auth метод (action) login, 
+   передаем ему formData- введенные данные.    
+  
+  В блоке ошибок: 
+  console.log('e',e)
+  Вывод ошибки. 
+
+  Для анализа ошибки в коде:
+  Пишем слово debugger в текте, 
+  Выходим на ошибку. 
+
+  vuex chrome extention 
+  (vue devtools- инструмент chrome дополнительный)
+
+  Посмотреть код/ на вкладочке vue сможем отслеживать state. 
+
+
+  4.5  Защита роутов с middleware. 
+
+  Добавим функционал, защищающий роуты в админке. 
+  Чтобы неавторизованный пользователь не мог на них заходить. 
+
+  В папке middleware: 
+  admin-auth.js: 
+                              context
+  export default function({store, redirect}) {
+    если пользователь не залогинен (обращаемся к геттеру)
+  if (!store.getters['auth/isAuthenticated']) {
+    // функция в nuxt. Переходим на страницу login
+    // используем get-параметр message=login
+    redirect('/admin/login?message=login')
+  }
+}
+
+Подключаем данный middleware ко всем страницам, которые хотим защитить. 
+Может быть несколько middleware в списке, важен порядок. 
+
+Папочка admin:
+меняем файлы
+create,list,logout,user
+
+export default {
+  layout: 'admin',
+  middleware: ['admin-auth']
+}
+
+В login.vue метод mounted() -подключается когда dom-дерево готово для работы. 
+created- вызывется и на сервере и на клиенте. 
+Тут нужно вызывать метод, который на клиенте только вызывается. 
+
+// Если переданный параметр 'login'- поясняем- что сначала надо войти в систему.
+mounted() {
+
+    получаем get-параметр 'message' из адресной строки
+    const {message} = this.$route.query
+
+    if (message === 'login') {
+    // выводим сообщение
+      this.$message.info('Для начала войдите в систему')
+    }
+  }
+
+
+4.6  Завершение сессии. 
+
+Страница logout: должна вызвать action для очистки данных в store, 
+затем выполнить redirect на другую страницу. 
+
+
+logout.vue: 
+
+<template>
+  <div>Очищаем данные</div>
+</template>
+
+<script>
+export default {
+  layout: 'admin',
+  middleware: ['admin-auth'],
+  до создания инстанса vue, т.е. в начале загрузки страницы
+  beforeCreate() {
+    вызываем action logout из store. Очищаем token в store
+    this.$store.dispatch('auth/logout')
+    Делаем редирект на страницу login. Добавляем get-параметр чтобы страница login вывела сообщение-
+    предложение залогиниться
+    this.$router.push('/admin/login?message=logout')
+  }
+}
+</script>
+
+
+В store   auth.js :
+(очищаем token)
+
+export const mutations = {
+  setToken(state, token) {
+    state.token = token
+  },
+  clearToken(state) {
+    очищает state
+    state.token = null
+  }
+}
+
+export const actions = {
+  async login({commit, dispatch}, formData) {
+    const token = await new Promise(resolve => {
+      setTimeout(() => resolve('mock-token'), 2000)
+    })
+    dispatch('setToken', token)
+  },
+  setToken({commit}, token) {
+    commit('setToken', token)
+  },
+  logout({commit}) {
+    вызываем очистку state
+    commit('clearToken')
+  }
+}
+
+
+В login.vue: 
+Получает get-параметр message: 
+
+    switch (message) {
+      case 'login':
+        this.$message.info('Для начала войдите в систему')
+        break
+      case 'logout':
+      // success- сообщение другим цветом
+        this.$message.success('Вы успешно вышли из системы')
+        break
+    }
+
+
 
 -->
