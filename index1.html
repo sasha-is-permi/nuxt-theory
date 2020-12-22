@@ -2718,6 +2718,330 @@ export const actions = {
         break
     }
 
+4.7 Обработка ошибок. 
+Создаем в store файл index.js. 
+Тут будем описывать базовые вещи. 
+
+export const state = () => ({
+  error: null
+})
+
+export const mutations = {
+  метод позволяет изменять ошибки. 
+  error их state присваиваем значение переменной error
+  setError(state, error) {
+    state.error = error
+  },
+ // очищаем error из state
+  clearError(state) {
+    state.error = null
+  }
+}
+// с помощью это   константы будем совершать доступ до ошибки.
+// Геттер error- из state получаем state.error
+export const getters = {
+  error: state => state.error
+}
+
+
+В store в auth.js: 
+добавляем метод reject
+
+
+export const state = () => ({
+  token: null
+})
+
+export const mutations = {
+  setToken(state, token) {
+    state.token = token
+  },
+  clearToken(state) {
+    state.token = null
+  }
+}
+
+export const actions = {
+  async login({commit, dispatch}, formData) {
+    try {
+      const token = await new Promise((resolve, reject) => {
+        setTimeout(() => resolve('mock-token'), 2000)
+      })
+      dispatch('setToken', token)
+    } catch (e) {
+      commit('setError', e, {root: true})
+      throw e
+    }
+  },
+  setToken({commit}, token) {
+    commit('setToken', token)
+  },
+  logout({commit}) {
+    commit('clearToken')
+  }
+}
+
+export const getters = {
+  isAuthenticated: state => Boolean(state.token)
+}
+
+
+Будем изменять state через mutation.
+В методе catch() вызываем comit(): 
+
+catch (e) {
+  Тут вызывается setError из state/index.js 
+  Сюда передается ошибка e
+  Стобы setError был не локальным mutation, а из файла index.js: 
+  {root: true} - смотрем этот метод в корне (index.js)
+      commit('setError', e, {root: true})
+      throw e // выбрасываем ошибку- чтобы в login также попали в блок catch
+    }
+
+ Нужно сообщить пользователю об ошибке. 
+ Используем шаблон (layout).
+ Сейчас работаем в empty.vue 
+ 
+<script>
+export default {
+  computed: {
+    // вычисляем переменную error- получаем ошибку из state
+    // computed свойство будет изменяться только если геттер изменится-
+    // это для оптимизации чтобы постоянно не пересчитывать
+    error() {
+      return this.$store.getters.error
+    }
+  },
+  // функция watch- отслеживает изменение error. 
+  //
+  watch: {
+  // следим за переменной error  
+    error(value) {
+      // если она меняется- выводим сообщение об ошибке
+      // используем element ui
+      this.$message.error(value)
+    }
+  }
+}
+</script>
+ 
+
+4.8  Добавление пользователей. 
+
+Из файла login.vue копируем в user.vue. 
+
+Модифицируем админку. 
+
+Файл user.vue:
+
+<template>
+  <el-form
+    :model="controls"
+    :rules="rules"
+    ref="form"
+    @submit.native.prevent="onSubmit"
+  >
+    <h2>Создать пользователя</h2>
+
+    <el-form-item label="Логин" prop="login">
+      <el-input v-model.trim="controls.login" />
+    </el-form-item>
+
+    <div class="mb2">
+      <el-form-item label="Пароль" prop="password">
+        <el-input v-model.trim="controls.password" type="password" />
+      </el-form-item>
+    </div>
+
+    <el-form-item>
+      <el-button
+        type="primary"
+        native-type="submit"
+        round
+        :loading="loading"
+      >
+        Создать
+      </el-button>
+    </el-form-item>
+  </el-form>
+</template>
+
+<script>
+export default {
+  layout: 'admin',
+  middleware: ['admin-auth'],
+  data() {
+    return {
+      loading: false,
+      controls: {
+        login: '',
+        password: ''
+      },
+      rules: {
+        login: [
+          { required: true, message: 'Введите логин', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: 'Введите пароль', trigger: 'blur' },
+          { min: 6, message: 'Пароль должен быть не менее 6 символов', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  methods: {
+    onSubmit() {
+      this.$refs.form.validate(async valid => {
+        if (valid) {
+          this.loading = true
+
+          try {
+            // formData отправляем на сервер
+            const formData = {
+              login: this.controls.login,
+              password: this.controls.password
+            }
+
+            await this.$store.dispatch('auth/createUser', formData)
+            // редирект не делаем. Выводим сообщение о добавлении
+            // нового пользователя
+            this.$message.success('Новый пользователь добавлен')
+            //  поскольку не уходим со страницы- очищаем форму. 
+            this.controls.login = ''
+            this.controls.password = ''
+            this.loading = false
+
+          } catch (e) {
+            this.loading = false
+          }
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+  form {
+    width: 600px;
+  }
+</style>
+
+В store/ auth.js  добавляем action: 
+
+ async createUser({commit}, formData) {
+    try {
+      console.log('createUser', formData)
+    } catch (e) {
+
+    }
+
+4.9  Список всех постов. 
+Создадим пункт "Посты" в админке. 
+Предусмотрим для возможность действий с ними. 
+
+Воспользуемся компонентом из element ui:  table. 
+
+Берем оттуда: custom colomn template (раздел)
+
+Обновляем файл list.vue: 
+
+
+<template>
+  <el-table
+    :data="posts"   // передаем в data посты. Посты возвращает метод asyncData
+    // можем потом отдельно сразу использовать поля из массива: 
+    // title, date, views, comments, _id
+    style="width: 100%"
+  >
+    <el-table-column
+      prop="title" // значение в колонке
+      label="Название"
+    />
+    <el-table-column label="Дата">
+      // выводим дату. Для примера- сегодняшнюю
+      <template slot-scope="{row: {date}}">
+        <i class="el-icon-time"></i>
+          // преобразуем дату в строку
+        <span style="margin-left: 10px">{{ new Date(date).toLocaleString() }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column label="Просмотры">
+      // выводим из массива значение views
+      <template slot-scope="{row: {views}}">
+        <i class="el-icon-view"></i>
+        <span style="margin-left: 10px">{{ views }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column label="Комментарии">
+      <template slot-scope="{row: {comments}}">
+        // берем иконки с сайта elemens ui /icons
+        <i class="el-icon-message"></i>
+        <span style="margin-left: 10px">{{ comments.length }}</span>
+      </template>
+    </el-table-column>
+    <el-table-column label="Действия">
+      // Получаем доступ до строки
+      <template slot-scope="{row}">
+        <el-button
+          icon="el-icon-edit" // с картинкой
+          type="primary"
+          circle // круглая кнопка
+          @click="open(row._id)"  // при щелчке на элементе текущей строки- вызываем 
+          // метод open для открытия текущей строки и передаем ему _id текущей строки
+        />
+        <el-button
+          icon="el-icon-delete"
+          type="danger"
+          circle 
+          // при щелчке на элементе текущей строки- вызываем 
+          // метод remove для удаления текущей строки и передаем ему _id текущей строки
+          @click="remove(row._id)"
+        />
+      </template>
+    </el-table-column>
+  </el-table>
+</template>
+
+<script>
+export default {
+  layout: 'admin',
+  middleware: ['admin-auth'],
+  async asyncData({store}) {
+    // вызываем action fetchAdmin из store/post.js
+    const posts = await store.dispatch('post/fetchAdmin')
+    return {posts} // возвращаем массив posts. Соединяем с data если она есть
+  },
+  methods: {
+    // методы пока просто выводят информацию в консоль
+    open(id) {
+      console.log('open', id)
+    },
+    remove(id) {
+      console.log('remove', id)
+    }
+  }
+}
+</script>
+
+Создаем также в store  post.js:  
+
+export const actions = {
+  // Делаем запрос к админским постам
+  // Сделаем потом еще другой метод для доступа к клиенским постам, которые выводятся в блоге
+  async fetchAdmin({}) {
+    return await new Promise(resolve => {
+      setTimeout(() => {
+        // в случае успешного обращения- возвращаем такие данные
+        resolve([
+          {title: 'Post 1', date: new Date(), views: 22, comments: [1, 2], _id: Math.random()},
+          {title: 'Post 2', date: new Date(), views: 22, comments: [1, 2], _id: Math.random()}
+        ])
+      }, 1000)
+    })
+  }
+}
+
+
 
 
 -->
