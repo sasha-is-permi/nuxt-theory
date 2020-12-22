@@ -5,7 +5,7 @@
   >
     <el-table-column
       prop="title"
-      label="Название"
+      label="Название" 
     />
     <el-table-column label="Дата">
       <template slot-scope="{row: {date}}">
