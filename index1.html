@@ -2935,7 +2935,7 @@ export default {
 
     }
 
-4.9  Список всех постов. 
+4.9  Список постов. Часть 1.
 Создадим пункт "Посты" в админке. 
 Предусмотрим для возможность действий с ними. 
 
@@ -3040,6 +3040,152 @@ export const actions = {
     })
   }
 }
+
+4.10. Список постов. Часть 2.
+В elements ui компонент tooltip- всплывающая подсказка при наведении на что. 
+Добавляем в list.vue tooltip:
+
+
+
+<template>
+  <el-table
+  :data="posts"
+  style="width: 100%"
+>
+  <el-table-column
+    prop="title"
+    label="Название"
+  />
+  <el-table-column label="Дата">
+    <template slot-scope="{row: {date}}">
+      <i class="el-icon-time"></i>
+      <span style="margin-left: 10px">{{ new Date(date).toLocaleString() }}</span>
+    </template>
+  </el-table-column>
+  <el-table-column label="Просмотры">
+    <template slot-scope="{row: {views}}">
+      <i class="el-icon-view"></i>
+      <span style="margin-left: 10px">{{ views }}</span>
+    </template>
+  </el-table-column>
+  <el-table-column label="Комментарии">
+    <template slot-scope="{row: {comments}}">
+      <i class="el-icon-message"></i>
+      <span style="margin-left: 10px">{{ comments.length }}</span>
+    </template>
+  </el-table-column>
+  <el-table-column label="Действия">
+    <template slot-scope="{row}">
+      <el-tooltip effect="dark" content="Открыть пост" placement="top"> // сообщение выскакивает наверх
+        <el-button
+          icon="el-icon-edit"
+          type="primary"
+          circle
+          @click="open(row._id)"
+        />
+      </el-tooltip>
+      <el-tooltip effect="dark" content="Удалить пост" placement="top">
+        <el-button
+          icon="el-icon-delete"
+          type="danger"
+          circle
+          @click="remove(row._id)"
+        />
+      </el-tooltip>
+    </template>
+  </el-table-column>
+</el-table>
+</template>
+
+<script>
+export default {
+layout: 'admin',
+middleware: ['admin-auth'],
+async asyncData({store}) {
+  const posts = await store.dispatch('post/fetchAdmin')
+  return {posts}
+},
+methods: {
+  open(id) {
+    this.$router.push(`/admin/post/${id}`)
+  },
+
+  При нажатии на кнопку remove- спрашиваем у пользователя-
+  действительно ли он хочет удалить данный пост? Делаем метод асинхронным.
+
+  async remove(id) {
+    // если нажата кнопочка "Да"
+    try {
+  Вызываем метод confirm из текущего контекста
+     с помощью await ждем выполнения confirm 
+      await this.$confirm('Удалить пост?', 'Внимание!', {
+        confirmButtonText: 'Да',
+        cancelButtonText: 'Отменить',
+        type: 'warning'
+      })
+       вызываем action из store/post.js для удаления поста из базы
+       передаем туда id поста
+      await this.$store.dispatch('post/remove', id)
+      удаляем также пост из локального массива постов. 
+      оставляем в массиве посты со всеми id кроме нашего
+      this.posts = this.posts.filter(p => p._id !== id)
+
+      this.$message.success('Пост удален')
+    } 
+    // Если отмена
+    catch (e) {}
+
+  }
+}
+}
+
+В папочке admin создаем папочку post для отображения конкретного поста. 
+Для динамического создания страницы создаем файл _id.vue:
+Динамически считывается id поста, загружается новые данные. 
+
+На сайте elements ui компонент breadcrumb- эффект хлебных крошек.
+
+<template>
+  <div>
+    <el-breadcrumb separator="/">
+      для возврата на список постов
+      <el-breadcrumb-item to="/admin/list">Посты</el-breadcrumb-item>
+      Выводим id поста
+      <el-breadcrumb-item>{{$route.params.id}}</el-breadcrumb-item>
+    </el-breadcrumb>
+  </div>
+</template>
+
+<script>
+export default {
+  layout: 'admin', // шаблон
+  middleware: ['admin-auth'] //  защита страницы
+}
+</script>
+
+
+  Изменяем цвет лоадинга в nuxt.config.js:  
+  loading: { color: '#409EFF' },
+
+  // Добавляем новый action в store/post.js
+
+export const actions = {
+  async fetchAdmin({}) {
+    return await new Promise(resolve => {
+      setTimeout(() => {
+        resolve([
+          {title: 'Post 1', date: new Date(), views: 22, comments: [1, 2], _id: Math.random()},
+          {title: 'Post 2', date: new Date(), views: 22, comments: [1, 2], _id: Math.random()}
+        ])
+      }, 1000)
+    })
+  },
+  async remove({}, id) {
+
+  }
+}
+
+4.11 Редактирование поста. 
 
 
 
