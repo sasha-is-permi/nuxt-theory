@@ -3187,6 +3187,581 @@ export const actions = {
 
 4.11 Редактирование поста. 
 
+Изменяем store\post.js: 
+
+const posts = [
+Указваем фиксированный id чтобы не терялся id
+  {title: 'Post 1', date: new Date(), views: 22, comments: [1, 2], _id: 'id1'},
+  {title: 'Post 2', date: new Date(), views: 22, comments: [1, 2], _id: 'id2'}
+]
+
+export const actions = {
+  async fetchAdmin({}) {
+    return await new Promise(resolve => {
+      setTimeout(() => {
+        resolve(posts)
+      }, 1000)
+    })
+  },
+  async remove({}, id) {
+
+  },
+  async update({}, {id, text}) {
+
+  },
+  async fetchAdminById({}, id) {
+    return await new Promise(resolve => {
+      setTimeout(() => {
+        // получаем текущий пост с id="is" из массива posts
+        resolve(posts.find(p => p._id === id))
+      }, 1000)
+    })
+  }
+}
+
+
+pages\admin\post\_id.vue  : 
+
+<template>
+  <div class="page-wrap">
+    <el-breadcrumb separator="/" class="mb">
+      <el-breadcrumb-item to="/admin/list">Посты</el-breadcrumb-item>
+      <el-breadcrumb-item>{{post.title}}</el-breadcrumb-item>
+    </el-breadcrumb>
+
+    <el-form
+      :model="controls"      
+      :rules="rules" // правила для валидации. 
+      // описываем ниже, и форма отправляется только при положительой валидации
+      ref="form"
+      @submit.native.prevent="onSubmit"
+    >
+      <h2>Войти в панель администратора</h2>
+
+      <el-form-item label="Текст в формате .md или .html" prop="text">
+        <el-input
+          type="textarea"
+          v-model.trim="controls.text"
+          resize="none"
+          :rows="10"
+        />
+      </el-form-item>
+
+      <div class="mb">
+        <small class="mr">
+          <i class="el-icon-time"></i>
+          <span>
+            {{ new Date(post.date).toLocaleString() }}
+          </span>
+        </small>
+
+        <small>
+          <i class="el-icon-view"></i>
+          <span>{{ post.views }}</span>
+        </small>
+      </div>
+
+      <el-form-item>
+        <el-button
+          type="primary"
+          native-type="submit"
+          round
+          // связываем аттрибут с переменной
+          :loading="loading"
+        >
+          Обновить
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+
+<script>
+export default {
+  layout: 'admin',
+  middleware: ['admin-auth'],
+  // head() - заголовок страницы вверху.
+  head() {
+    return {
+      title: `Пост | ${this.post.title}`
+    }
+  },
+  // проверяем  параметры страницы params. 
+  // Если есть id у странички- валидно
+  // вызываем функцию ниже
+  validate({params}) {
+    return Boolean(params.id)
+  },
+
+  async asyncData({store, params}) {
+   // вызываем action fetchAdminById из store
+   // передаем ему id
+   // этот метод возвращает данные данного поста с сервера
+   const post = await store.dispatch('post/fetchAdminById', params.id)
+    return {post}
+  },
+
+  // asyncData() и data() объединяются. 
+  // просто один формируется на сервере, а другой на клиенте. 
+
+  data() {
+    return {
+      loading: false,
+      controls: {
+        text: ''
+      },
+      rules: {
+        text: [
+          { required: true, message: 'Текст не должен быть пустым', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  methods: {
+    onSubmit() {
+      // валидация
+      this.$refs.form.validate(async valid => {
+        if (valid) {
+          this.loading = true
+
+          const formData = {
+            text: this.controls.text,
+            id: this.post._id
+          }
+
+          try {
+            await this.$store.dispatch('post/update', formData)
+            this.$message.success('Пост обновлен')
+            this.loading = false
+          } catch (e) {
+            this.loading = false
+          }
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+  .page-wrap {
+    width: 600px;
+  }
+
+  .mr {
+    margin-right: 2rem;
+  }
+</style>
+
+
+4.12. Создание поста. 
+
+pages/admin/create.vue:
+
+<template>
+  <el-form
+    :model="controls"
+    :rules="rules"
+    ref="form"
+    @submit.native.prevent="onSubmit"
+  >
+
+    <h1 class="mb">Создать новый пост</h1>
+
+    <el-form-item label="Введите название поста" prop="title">
+      <el-input
+        v-model.trim="controls.title"
+      />
+    </el-form-item>
+
+    <el-form-item label="Текст в формате .md или .html" prop="text">
+      <el-input
+        type="textarea"
+        v-model.trim="controls.text"
+        resize="none"
+        :rows="10"
+      />
+    </el-form-item>
+
+    <el-form-item>
+      <el-button
+        type="primary"
+        native-type="submit"
+        round
+        :loading="loading"
+      >
+        Создать пост
+      </el-button>
+    </el-form-item>
+  </el-form>
+</template>
+
+<script>
+export default {
+  layout: 'admin',
+  middleware: ['admin-auth'],
+  data() {
+    return {
+      loading: false,
+      controls: {
+        title: '',
+        text: ''
+      },
+      rules: {
+        text: [
+          { required: true, message: 'Текст не должен быть пустым', trigger: 'blur' }
+        ],
+        title: [
+          { required: true, message: 'Название поста не может быть пустым', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  methods: {
+    onSubmit() {
+      this.$refs.form.validate(async valid => {
+        if (valid) {
+          this.loading = true
+
+          const formData = {
+            title: this.controls.title,
+            text: this.controls.text
+          }
+
+          try {
+            await this.$store.dispatch('post/create', formData)
+            this.controls.text = ''
+            this.controls.title = ''
+            this.$message.success('Пост создан')
+          } catch (e) {} finally {
+            this.loading = false // выполняется в любом случае
+          }
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+  form {
+    width: 600px;
+  }
+</style>
+
+
+4.13 Предпросмотр текста в MD и HTML
+Используем компонент element ui:  dialog. 
+
+<template>
+  <el-form
+    :model="controls"
+    :rules="rules"
+    ref="form"
+    @submit.native.prevent="onSubmit"
+  >
+
+    <h1 class="mb">Создать новый пост</h1>
+
+    <el-form-item label="Введите название поста" prop="title">
+      <el-input
+        v-model.trim="controls.title"
+      />
+    </el-form-item>
+
+    <el-form-item label="Текст в формате .md или .html" prop="text">
+      <el-input
+        type="textarea"
+        v-model="controls.text"
+        resize="none"
+        :rows="10"
+      />
+    </el-form-item>
+
+    Кнопочка, включающая предпросмотр
+    <el-button class="mb" type="success" plain @click="previewDialog = true">
+      Предпросмотр
+    </el-button>
+// :visible.sync="previewDialog"  vue-модель. Если previewDialog = true- включен предпросмотр
+    <el-dialog title="Предпросмотр" :visible.sync="previewDialog">
+      <div :key="controls.text"> //чтобы перерисовывать предпросмотр при любом изменении текста
+        <vue-markdown>{{controls.text}}</vue-markdown>
+      </div>
+    </el-dialog>
+
+    <el-form-item>
+      <el-button
+        type="primary"
+        native-type="submit"
+        round
+        :loading="loading"
+      >
+        Создать пост
+      </el-button>
+    </el-form-item>
+  </el-form>
+</template>
+
+<script>
+export default {
+  layout: 'admin',
+  middleware: ['admin-auth'],
+  data() {
+    return {
+      previewDialog: false,
+      loading: false,
+      controls: {
+        title: '',
+        text: ''
+      },
+      rules: {
+        text: [
+          { required: true, message: 'Текст не должен быть пустым', trigger: 'blur' }
+        ],
+        title: [
+          { required: true, message: 'Название поста не может быть пустым', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  methods: {
+    onSubmit() {
+      this.$refs.form.validate(async valid => {
+        if (valid) {
+          this.loading = true
+
+          const formData = {
+            title: this.controls.title,
+            text: this.controls.text
+          }
+
+          try {
+            await this.$store.dispatch('post/create', formData)
+            this.controls.text = ''
+            this.controls.title = ''
+            this.$message.success('Пост создан')
+          } catch (e) {} finally {
+            this.loading = false
+          }
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+  form {
+    width: 600px;
+  }
+</style>
+
+Устанавливаем дополнительный компонент 
+npm i vue-markdown
+
+Регистриуем компонент в plugins/globals.js 
+import Vue from 'vue'
+import VueMarkdown from 'vue-markdown'
+import Element from 'element-ui'
+import locale from 'element-ui/lib/locale/lang/ru-RU'
+
+Vue.use(Element, { locale })
+Vue.component('vue-markdown', VueMarkdown)
+
+в диалоговом окне
+*bold*  - интерпретирует по правилам при предпросмотре
+
+Можем вписывать html или markdown- смотрим как будет выглядеть. 
+
+4.14 Загрузка файлов. 
+
+В element ui компонент upload.
+
+Вставляем этот компонент в create.vue. 
+
+<template>
+  <el-form
+    :model="controls"
+    :rules="rules"
+    ref="form"
+    @submit.native.prevent="onSubmit"
+  >
+
+    <h1 class="mb">Создать новый пост</h1>
+
+    <el-form-item label="Введите название поста" prop="title">
+      <el-input
+        v-model.trim="controls.title"
+      />
+    </el-form-item>
+
+    <el-form-item label="Текст в формате .md или .html" prop="text">
+      <el-input
+        type="textarea"
+        v-model="controls.text"
+        resize="none"
+        :rows="10"
+      />
+    </el-form-item>
+
+    <el-button class="mb" type="success" plain @click="previewDialog = true">
+      Предпросмотр
+    </el-button>
+
+    <el-dialog title="Предпросмотр" :visible.sync="previewDialog">
+      <div :key="controls.text">
+        <vue-markdown>{{controls.text}}</vue-markdown>
+      </div>
+    </el-dialog>
+
+    <el-upload
+      class="mb"
+      drag
+      ref="upload"
+      action="https://jsonplaceholder.typicode.com/posts/"
+      :on-change="handleImageChange"
+      :auto-upload="false" // самостоятельно загружаем файл на сервер
+    >
+      <i class="el-icon-upload"></i>
+      <div class="el-upload__text">Перетащите картинку <em>или нажмите</em></div>
+      <div class="el-upload__tip" slot="tip">файлы с расширением jpg/png</div>
+    </el-upload>
+
+    <el-form-item>
+      <el-button
+        type="primary"
+        native-type="submit"
+        round
+        :loading="loading"
+      >
+        Создать пост
+      </el-button>
+    </el-form-item>
+  </el-form>
+</template>
+
+<script>
+export default {
+  layout: 'admin',
+  middleware: ['admin-auth'],
+  data() {
+    return {
+      image: null,
+      previewDialog: false,
+      loading: false,
+      controls: {
+        title: '',
+        text: ''
+      },
+      rules: {
+        text: [
+          { required: true, message: 'Текст не должен быть пустым', trigger: 'blur' }
+        ],
+        title: [
+          { required: true, message: 'Название поста не может быть пустым', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  methods: {
+    handleImageChange(file, fileList) {
+      this.image = file.raw
+    },
+    onSubmit() {
+      this.$refs.form.validate(async valid => {
+       // если форма валидна и картинка загрузилась
+        if (valid && this.image) {
+          this.loading = true
+
+          const formData = {
+            title: this.controls.title,
+            text: this.controls.text,
+            image: this.image
+          }
+
+          try {
+            await this.$store.dispatch('post/create', formData)
+            this.controls.text = ''
+            this.controls.title = ''
+            this.image = null
+            this.$refs.upload.clearFiles() // после создания поста- удаляем загруженные файлы
+            this.$message.success('Пост создан')
+          } catch (e) {} finally {
+            this.loading = false
+          }
+        } else { // если картинка не загрузилась
+          this.$message.warning('Форма не валидна')
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+  form {
+    width: 600px;
+  }
+</style>
+
+Слушаем хук onChange- когда файл загружен или выбран для upload
+
+Загруженный объект file- потребуется поле raw- это и есть сам файл. 
+
+this.image = file.raw 
+
+store/post.js 
+Дописываем метод create()
+
+const posts = [
+  {title: 'Post 1', date: new Date(), views: 22, comments: [1, 2], _id: 'id1'},
+  {title: 'Post 2', date: new Date(), views: 22, comments: [1, 2], _id: 'id2'}
+]
+
+export const actions = {
+  async fetchAdmin({}) {
+    return await new Promise(resolve => {
+      setTimeout(() => {
+        resolve(posts)
+      }, 1000)
+    })
+  },
+  async remove({}, id) {
+
+  },
+  async update({}, {id, text}) {
+
+  },
+  async create({commit}, {title, text, image}) {
+    try {
+      const fd = new FormData() //FormData() - класс, встроенный в javascript
+
+      fd.append('title', title) // методы класса уже заданны
+      fd.append('text', text)
+      // передаем image
+      fd.append('image', image, image.name)
+
+      return await new Promise(resolve => {
+        setTimeout(() => {
+          resolve()
+        }, 1000)
+      })
+
+    } catch (e) {
+      // выкидываем ошибку, саму ошибку передаем, setError находится на корневом уровне
+      // commit- используем mutation
+      commit('setError', e, {root: true})
+      throw e
+    }
+  },
+  async fetchAdminById({}, id) {
+    return await new Promise(resolve => {
+      setTimeout(() => {
+        resolve(posts.find(p => p._id === id))
+      }, 1000)
+    })
+  }
+}
 
 
 
