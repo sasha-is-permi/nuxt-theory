@@ -9,6 +9,10 @@ https://nuxtjs.org
 
 https://nuxtjs.org/guide/installation
 
+Проект на nuxt:
+https://bitbucket.org/beeqb/tradergram-front/src/dev/ 
+
+
 В visual studio code:
 
 1) Установить create-nuxt-app
@@ -3763,6 +3767,208 @@ export const actions = {
   }
 }
 
+5.1 
+Декомпозиция файлов. 
+
+Папка server/index.js 
+Node.js проект (поскольку используется nuxt, ssr- есть не только клиентская, но и серверная часть). 
+
+const express = require('express')
+const consola = require('consola')
+const { Nuxt, Builder } = require('nuxt')
+const app = express()
+
+// Import and Set Nuxt.js options             импортируем config из nuxt.config
+let config = require('../nuxt.config.js')
+config.dev = !(process.env.NODE_ENV === 'production')
+
+async function start() {
+  // Init Nuxt.js           config попадает в объект nuxt              
+  const nuxt = new Nuxt(config)
+
+  const {
+    host = process.env.HOST || '127.0.0.1',
+    port = process.env.PORT || 3000
+  } = nuxt.options.server
+
+  // Build only in dev mode происходит билдинг если находимся в dev-режиме
+  if (config.dev) {
+    const builder = new Builder(nuxt)
+    await builder.build()
+  }
+
+  // Give nuxt middleware to express     // app- сервер express. Добавляем возможность ssr nuxt. 
+  app.use(nuxt.render)
+
+  // Listen the server
+  app.listen(port, host)   // запускаем express сервер на нужном порту и хосте
+  consola.ready({
+    message: `Server listening on http://${host}:${port}`,   // выводим сообщение
+    badge: true
+  })
+}
+start()
+
+Переделываем данный файл: 
+
+const express = require('express')
+const consola = require('consola')
+const { Nuxt, Builder } = require('nuxt')
+const app = require('./app') // подключаем app.js
+
+const config = require('../nuxt.config.js')
+config.dev = !(process.env.NODE_ENV === 'production')
+
+async function start() {
+  const nuxt = new Nuxt(config)
+
+  const {
+    host = process.env.HOST || '127.0.0.1',
+    port = process.env.PORT || 3000
+  } = nuxt.options.server
+
+  if (config.dev) {
+    const builder = new Builder(nuxt)
+    await builder.build()
+  }
+
+  app.use(nuxt.render)
+
+  // Выводим сообщение что сервер запущен когда он реально запущен
+  app.listen(port, host, () => {
+    consola.ready({
+      message: `Server listening on http://${host}:${port}`,
+      badge: true
+    })
+  })
+}
+start()
 
 
--->
+Константу app переносим в другой файл
+app.js: 
+
+Подключаем express
+const express = require('express')
+const bodyParser = require('body-parser') // подключаем body-parser
+const app = express()
+
+
+app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.json())
+
+module.exports = app
+
+
+Пишем npm install body-parser  
+Парсим входящие параметры которые обрабатываем в коде. 
+
+Перезапускаем сервер.
+Ошибки на стороне сервера отслеживаем в консоли visual studio code, 
+а не в chrome.
+
+
+5.2 Создадим объект, в котором будем хранить конфигурацию для всего приложения. 
+
+Два набора ключей- для версии разработки и для production-версии. 
+
+В папочке server папочка keys: 
+
+index.js: 
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = require('./keys.prod')
+} else {
+  module.exports = require('./keys.dev')
+}
+
+
+keys.dev.js: 
+module.exports = {
+
+}
+
+keys.prod.js
+module.exports = {
+
+}
+
+Для build-версии- можно скрыть ключи, для dev-открыть. 
+
+5.3 Подключение MongoDB. 
+
+Можно её подключить локально и настроить, а можно воспользоваться сервисом mlab. 
+
+https://mlab.com 
+
+sasha-is-permi@mail.ru
+qwe123*** 
+
+
+Заходим в mongoDB атлас. 
+https://cloud.mongodb.com/v2/5fe454049c47c414b5ed1005#clusters/edit?filter=starter
+
+ Create a Starter Cluster
+
+
+ Создаем User и пароль.
+
+ Clusters / collections / Add database
+ 
+
+ Чтобы посмотреть настройки- заходим:
+
+Clasters
+connect
+choose connection method
+Connect your application 
+
+mongodb+srv://sasha-is-permi:<password>@cluster0.kx3t0.mongodb.net/<dbname>?retryWrites=true&w=majority
+
+Полный экземпляр кода: 
+
+  const MongoClient = require('mongodb').MongoClient;
+const uri = "mongodb+srv://sasha-is-permi:<password>@cluster0.kx3t0.mongodb.net/<dbname>?retryWrites=true&w=majority";
+const client = new MongoClient(uri, { useNewUrlParser: true });
+client.connect(err => {
+  const collection = client.db("test").collection("devices");
+  // perform actions on the collection object
+  client.close();
+});
+
+Меняем keys.dev.s и keys.prod.js 
+
+keys.dev.js:
+module.exports = { // меняем имя пользователя, пароль, имя проекта
+  MONGO_URI: `mongodb+srv://sasha2020:qwe123***@cluster0.kx3t0.mongodb.net/Base1.Cluster0?retryWrites=true&w=majority`
+}
+
+keys.prod.js:
+module.exports = {
+  MONGO_URI: ''
+}
+
+Устанавливаем пакет 
+npm i mongoose
+
+Подключаем пакет в server/app.js : 
+
+
+const express = require('express')
+const bodyParser = require('body-parser')
+const mongoose = require('mongoose')
+const keys = require('./keys')
+const app = express()
+
+// добавляем ключ к базе из файла keys:
+mongoose.connect(keys.MONGO_URI)    // подключаемся к базе. метод возвращает promise, обрабатываем его
+  .then(() => console.log('MongoDB connected...'))  // если база подключилась
+  .catch(error => console.error(error))  // если база не подключилась
+
+app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.json())
+
+module.exports = app
+
+Перезапускаем проект- сообщение в vusual studio code:
+"mongoDB connected"
