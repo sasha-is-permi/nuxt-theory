@@ -3901,7 +3901,7 @@ module.exports = {
 
 https://mlab.com 
 
-sasha-is-permi@mail.ru
+sasha-is-permi@yandex.ru
 qwe123*** 
 
 
@@ -3910,8 +3910,12 @@ https://cloud.mongodb.com/v2/5fe454049c47c414b5ed1005#clusters/edit?filter=start
 
  Create a Starter Cluster
 
+При регистрации на сайте регистрируемся не просто с учебными целями, 
+а для работы с базой данных. 
 
- Создаем User и пароль.
+Потом создаем кластер, затем создаем базу данных
+
+
 
  Clusters / collections / Add database
  
@@ -3923,7 +3927,7 @@ connect
 choose connection method
 Connect your application 
 
-mongodb+srv://sasha-is-permi:<password>@cluster0.kx3t0.mongodb.net/<dbname>?retryWrites=true&w=majority
+mongodb+srv://sasha-is-permi:<password>@cluster1.v2afi.mongodb.net/<dbname>?retryWrites=true&w=majority
 
 Полный экземпляр кода: 
 
@@ -3939,8 +3943,8 @@ client.connect(err => {
 Меняем keys.dev.s и keys.prod.js 
 
 keys.dev.js:
-module.exports = { // меняем имя пользователя, пароль, имя проекта
-  MONGO_URI: `mongodb+srv://sasha2020:qwe123***@cluster0.kx3t0.mongodb.net/Base1.Cluster0?retryWrites=true&w=majority`
+module.exports = { // меняем имя пользователя, пароль, имя базы данных
+  MONGO_URI: `mongodb+srv://sasha-is-permi:qwe123***@cluster1.v2afi.mongodb.net/sasha-is-permi?retryWrites=true&w=majority`
 }
 
 keys.prod.js:
@@ -3949,7 +3953,9 @@ module.exports = {
 }
 
 Устанавливаем пакет 
-npm i mongoose
+npm i -save-dev mongoose
+npm i -g mongoose
+
 
 Подключаем пакет в server/app.js : 
 
@@ -3972,3 +3978,31 @@ module.exports = app
 
 Перезапускаем проект- сообщение в vusual studio code:
 "mongoDB connected"
+
+
+
+5.4  Роуты, контроллеры, модели
+
+В папке server создаем папку routes
+Начнем с роутов, отвечающие за авторизацию. 
+
+
+Файл server\routes\auth.routes.js 
+// импортируем класс Router из библиотеки express
+const {Router} = require('express')
+const {login, createUser} = require('../controllers/auth.controller')
+// Создаем объект класса Router
+const router = Router()
+
+// /api/auth/admin/login
+router.post('/admin/login', login)
+
+// /api/auth/admin/create
+router.post('/admin/create', createUser)
+
+// экспортируем объект router
+module.exports = router
+
+В app.js: 
+Импортируем и регимтрируем роуты. 
+
