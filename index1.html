@@ -4169,3 +4169,53 @@ pages\admin\index.vue :
 (props)
 а потом эти саммивы используем для построения данных
 (this.data, this.labels)
+
+
+8.1 Исправление waring. 
+
+
+mongoose.connect(keys.MONGO_URI,{useNewUrlParser:true})
+
+
+8.2 Фильтр отображния даты. 
+
+
+
+Регистрируем фильтр в plugins/globals.js 
+
+import Vue from 'vue'
+import VueMarkdown from 'vue-markdown'
+import Element from 'element-ui'
+import locale from 'element-ui/lib/locale/lang/ru-RU'
+
+import DateFilter from '@/common/date.filter' // импортируем
+
+Vue.use(Element, { locale })
+Vue.component('vue-markdown', VueMarkdown)
+Vue.filter('date', DateFilter)  // регистрируем
+
+
+date.filter.js: 
+// 1-й параметр- сама величина- post.date,
+// 2 параметр- который в фильтре-  ('date')
+export default (value, type) => {
+  const date = new Date(value)
+  if (type === 'date') {
+    return date.toLocaleDateString() // только дата
+  } else if (type === 'time') {
+    return date.toLocaleTimeString() // только время
+  }
+  return date.toLocaleString() // Полная дата. Если обратиться к фильтру 
+  без параметров
+}
+
+
+Теперь используем в post.vue: 
+{{post.date | date('date')}}
+
+Передаем параметр в фильтр- указываем только дату. 
+
+В других местах так же меняем :
+{{comment.date || date}}
+
+
