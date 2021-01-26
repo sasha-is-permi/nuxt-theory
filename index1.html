@@ -3990,13 +3990,25 @@ module.exports = app
 Файл server\routes\auth.routes.js 
 // импортируем класс Router из библиотеки express
 const {Router} = require('express')
+
+
+// импортируем функции login и createUser 
+// из файла /controllers/auth.controller
 const {login, createUser} = require('../controllers/auth.controller')
 // Создаем объект класса Router
 const router = Router()
 
+// Для работы с авторизацией в rest api всегда 
+// используем метод post
+// Передаем функцию login, подученную из controller
+// в роутер  (возможно pages/admin/login)
+
 // /api/auth/admin/login
 router.post('/admin/login', login)
 
+
+// Передаем функцию createUser, подученную из controller
+// в роутер  (возможно pages/admin/create)
 // /api/auth/admin/create
 router.post('/admin/create', createUser)
 
@@ -4004,5 +4016,156 @@ router.post('/admin/create', createUser)
 module.exports = router
 
 В app.js: 
-Импортируем и регимтрируем роуты. 
+Импортируем и региcтрируем роуты. 
 
+const authRoutes = require('./routes/auth.routes')
+
+app.use('/api/auth', authRoutes)
+
+/api - собственный endpoint (для backend запросов)
+
+auth- префикс будет (модуль)
+
+В папке server: создаем папку controllers. 
+
+Создаем файл auth.controller.js
+
+module.exports.login = (req, res) => {
+}
+
+// для создания нового пользователя в админке
+module.exports.createUser = (req, res) => {
+}
+
+Rest api: 
+
+post- создаем элементы
+get- получаем элементы 
+put- редактирования 
+delete- удаления 
+
+
+В папке server: 
+папка models. 
+Файл user.model.js. 
+Опишем в этом файле модель пользователя. 
+
+
+5.5  Авторизация пользователя. 
+
+usel.model.js  
+
+В модуле создаем схему, которую регистрируем в user.model.js 
+Затем с помощью нее работаем с базой данных
+
+const {model, Schema} = require('mongoose')
+
+// userShema- наследник класса Schema
+const userSchema = new Schema({
+  login: {
+    type: String,
+    unique: true,
+    required: true
+  },
+  password: {
+    type: String,
+    required: true,
+    minLength: 6
+  }
+})
+
+module.exports = model('users', userSchema)
+
+7.1 Настройка и установка графиков
+
+Страница аналитики: pages/admin/index.vue 
+
+https://vue-chartjs.org 
+
+npm install vue-chartjs chart.js --save
+
+pages\admin\index.vue 
+
+<template>
+  <div>
+    <h1>Аналитика по постам</h1>
+    Так нужно оформлять для chartjs:
+    <canvas height="50vh" ref="canvas"></canvas> 
+    (на полстраницы график)
+  </div>
+</template>
+
+<script>
+import {Bar} from 'vue-chartjs' // импортируем bar из модуля vue-chartjs
+export default {
+  layout: 'admin',
+  middleware: ['admin-auth'],
+  extends: Bar,
+  mounted() {
+    const data = {
+        массив из строк. Каждая строка- отдельная единица в графике.
+        labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
+        datasets: [{
+            label: '# of Votes',
+            12 относится к красному, 19 к синему
+            data: [12, 19, 3, 5, 2, 3],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255,99,132,1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    }
+    const options = {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero:true
+                }
+            }]
+        }
+    }
+    this.renderChart(data, options)
+  }
+}
+</script>
+
+vue-chartjs - инструмент по построению графиков. 
+Просто строим графики- пока не работаем с базой данных. 
+
+7.2 Формирование данных на сервере
+
+В routes: 
+post\routes\js: 
+
+router.get (
+  'admin/post/analitics'
+)
+
+В post.controllers.js- получаем данные по просмотрам и постам. 
+
+B Аналитике по постам index.vue (где данные графиков были)- 
+вызываем action методом dispatch из store. 
+
+В этом методо обращаемся через axios к аналитике 
+
+7.3 Создание компонента графика. 
+
+pages\admin\index.vue :
+Заменяем данные на массивы data и labels, приходящие
+из других компонентов
+(props)
+а потом эти саммивы используем для построения данных
+(this.data, this.labels)
