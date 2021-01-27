@@ -4219,3 +4219,161 @@ export default (value, type) => {
 {{comment.date || date}}
 
 
+8.3 Нумерация страниц. 
+
+В nuxt.config.js
+
+  env: {
+    appName: 'SSR Blog'
+  }
+
+  pages/admin/index.vue : 
+
+    head: {
+    title: `Аналитика | ${process.env.appName}`
+  }
+
+  В заголовке страницы название появляется. 
+
+    pages\post\_id.vue 
+
+    Сверху в заголовке странички- появляется информация
+
+    head() {
+    return {
+      title: `${this.post.title} | ${process.env.appName}`
+    }
+
+    pages/admin/create - тоже добавляем заголовок
+
+     head: {
+    title: `Новый пост | ${process.env.appName}`
+  },
+
+  В login.vue аналогично. 
+
+  8.4 Создание из приложения 
+
+  Сайт nuxt. Модули. 
+
+  Используем  axios модуль. 
+  Можем добавить pwa модуль. 
+
+  npm install @nuxtjs/pwa
+
+
+
+
+  Добавляем плагин в nuxt.config.js 
+
+  modules: [
+    '@nuxtjs/axios',
+    '@nuxtjs/pwa'
+  ],
+
+
+  Создаем папку static, добавляем туда файл icon.png- 
+  для мобильных устройств. 
+
+  Разрешение больше 512x512 px должно быть. 
+
+  Файл gitignore : 
+
+  Сервисворкеры sw.* не добавляем в git. 
+
+
+  В pwa модуле- коллекция workbox. 
+  Это набор javascript библиотек для pwa. 
+
+  Теперь в nuxt.config.js : 
+  workbox: {
+
+  }
+  Можно докунфигурировать pwa если нужно 
+  
+  Так же там же можно добавить meta: {
+
+  } 
+
+  Можем добавлять различные метатеги. 
+
+  Еще дополнительная библиотека oneSignal- 
+  добавим в модули, затем можем конфигурировать. 
+
+  Создание итогового spa для загрузки на сервер:
+  npm run build 
+
+  В папке dist: 
+  папки 
+  client, server. 
+  swregister.js - запускает сервисворкеры. 
+
+  9. Деплой приложения. 
+  
+  9.1 Защита ключей. 
+
+  heroku - бесплатный сервис- позволяет выгружать 
+  web-приложения. 
+
+  В папке server: 
+  папка keys. 
+
+  keys.dev.js - содержит например настройки доступа к базе данных
+  keys.prod.js - не содержит секретных данных, получает их из enviroment
+  module.exports = {
+  MONGO_URI: process.env.MONGO_URI,
+  JWT: process.env.JWT
+}
+
+
+
+ В gitignore: 
+
+ Добавить:
+ server/keys/keys.dev.js
+(чтобы не ушел этот файл на Github возможно в открытй доступ)
+
+
+9.2 Настройка и установка Heroku. 
+
+В поиске: Heroku CLI. 
+Скачиваем с сайта installer для windows.
+В консоли набираем heroku- команды список высвечиваются-
+значит успешно все установили. 
+
+Входим на сайт heroku, регистрируем. 
+
+Create new app - создание нового приложения. 
+
+
+Deploy через Heroku CLI: 
+
+login:
+heroku login 
+
+create a new git respository:
+cd my-project
+git init
+heroku git:remote -a nuxt-ssr-blog 
+
+deploy: 
+git add .
+git commit -am 'make it better'
+git push heroku master
+
+Можно через github.
+
+
+9.3
+Настройка приложения для deploy. 
+
+nuxt heroku deploy в поиске- описание 
+"Развертывание Heroku". 
+
+В package.json: 
+
+"heroku-postbuild":"npm run build"
+
+
+
+
