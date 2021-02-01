@@ -4289,7 +4289,7 @@ export default (value, type) => {
   workbox: {
 
   }
-  Можно докунфигурировать pwa если нужно 
+  Можно доконфигурировать pwa если нужно 
   
   Так же там же можно добавить meta: {
 
@@ -4374,6 +4374,43 @@ nuxt heroku deploy в поиске- описание
 
 "heroku-postbuild":"npm run build"
 
+Еще добавляем поле "engines" - указываем
+используемую версию node.js
+
+dashboard.heroku.com- добавляем системные переменные.
+Описанные на сайте nuxt.js 
+Также добавляем переменные из keys.dev.js . 
+
+Еще переменная для axios. 
+При SSR- делаем запросы как с клиента так и с сервера. 
+При разработке приложения- запросы на localhost:3000 . 
+С клиента. 
+При разработке работало, при production- надо по-другому.
+В настройках open app- попадаем на ссылку с адресом нашего приложения. 
+(в dashboard.heroku.com - ссылка на наше приложение)
+BASE_URL - ставим данную ссылку. 
+
+В nuxt.config.js настроим axios: 
+
+axios: {
+  BASE_URL: process.env.BASE_URL || 'http://localhost:3000'
+}
+
+9.4 deploy приложения на сайт heroku
+visual studio code 
+heroku login 
+
+create new respository:
+cd my-project 
+git init 
+heroku git:remoute -a nuxt-ssr-blog
+
+deploy your application: 
+git add . 
+git commit -am '25'
+git push heroku master 
 
 
+heroku open- открываем на удаленном сервисе 
+наш проект. 
 
